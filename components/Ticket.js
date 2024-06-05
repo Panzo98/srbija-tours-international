@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,24 +6,29 @@ import {
   StyleSheet,
   Animated,
   Easing,
+  Alert,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { formatPrice } from "../utils/formatPrice";
+import * as SecureStore from "expo-secure-store";
 
-const Ticket = ({ ticket, selectedLine }) => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+const Ticket = ({
+  ticket,
+  activeTab,
+  loadStoredTickets,
+  isExpanded,
+  onToggleExpand,
+}) => {
   const [heightAnim] = useState(new Animated.Value(0));
 
-  const handleSelect = () => {
-    setExpanded(!expanded);
+  useEffect(() => {
     Animated.timing(heightAnim, {
-      toValue: expanded ? 0 : 200, // Adjust 200 to fit the expanded content height
+      toValue: isExpanded ? 250 : 0,
       duration: 300,
       easing: Easing.ease,
       useNativeDriver: false,
     }).start();
-  };
+  }, [isExpanded]);
 
   const getDirectionText = (direction) => {
     return direction === 1 ? "Jednosmjerna" : "Povratna";
@@ -33,9 +38,51 @@ const Ticket = ({ ticket, selectedLine }) => {
     return usageCount > 0 ? "Iskorišćena" : "Neiskorišćena";
   };
 
+  const handleDownload = async () => {
+    try {
+      const storedTickets = await SecureStore.getItemAsync("tickets");
+      const tickets = storedTickets ? JSON.parse(storedTickets) : [];
+
+      const ticketExists = tickets.some((t) => t.id_res === ticket.id_res);
+      if (ticketExists) {
+        Alert.alert("Info", "Karta je već preuzeta.");
+        return;
+      }
+
+      tickets.push(ticket);
+      await SecureStore.setItemAsync("tickets", JSON.stringify(tickets));
+      Alert.alert("Success", "Karta je preuzeta.");
+      loadStoredTickets();
+    } catch (error) {
+      Alert.alert("Error", "Došlo je do greške prilikom preuzimanja karte.");
+      console.error("Error saving ticket:", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      const storedTickets = await SecureStore.getItemAsync("tickets");
+      let tickets = storedTickets ? JSON.parse(storedTickets) : [];
+
+      tickets = tickets.filter((t) => t.id_res !== ticket.id_res);
+
+      await SecureStore.setItemAsync("tickets", JSON.stringify(tickets));
+      Alert.alert("Success", "Karta je izbrisana iz preuzetih.");
+      loadStoredTickets();
+    } catch (error) {
+      Alert.alert("Error", "Došlo je do greške prilikom brisanja karte.");
+      console.error("Error deleting ticket:", error);
+    }
+  };
+
+  const handleView = () => {};
+
   return (
     <View style={{ flex: 1 }}>
-      <TouchableOpacity style={[styles.container]} onPress={handleSelect}>
+      <TouchableOpacity
+        style={[styles.container]}
+        onPress={() => onToggleExpand(ticket.id_res)}
+      >
         <View style={styles.qrContainer}>
           <QRCode
             value={`https://drivesoft-srbijatours.com/ticket/show?booking_number=${ticket.id_res}`}
@@ -67,6 +114,34 @@ const Ticket = ({ ticket, selectedLine }) => {
             </Text>
             <Text style={styles.additionalInfo}>Od: {ticket.from}</Text>
             <Text style={styles.additionalInfo}>Do: {ticket.to}</Text>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.button} onPress={handleView}>
+                <Text style={styles.buttonText}>Pregled karte</Text>
+              </TouchableOpacity>
+              {activeTab === "all" && (
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={handleDownload}
+                >
+                  <Text style={styles.buttonText}>Preuzmi kartu</Text>
+                </TouchableOpacity>
+              )}
+              {activeTab === "stored" && (
+                <TouchableOpacity style={styles.button} onPress={handleDelete}>
+                  <Text style={styles.buttonText}>Izbriši iz preuzetih</Text>
+                </TouchableOpacity>
+              )}
+              {ticket.direction === 2 && (
+                <TouchableOpacity
+                  style={[styles.button, styles.disabledButton]}
+                  disabled={true}
+                >
+                  <Text style={styles.buttonText}>
+                    Rezerviši povratni datum
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </Animated.View>
         </View>
       </TouchableOpacity>
@@ -75,28 +150,12 @@ const Ticket = ({ ticket, selectedLine }) => {
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  contentContainer: {
-    padding: 10,
-  },
   container: {
     backgroundColor: "white",
     width: "100%",
     flexDirection: "row",
     borderRadius: 10,
-    // padding: 10,
     overflow: "hidden",
-    // shadowColor: "#000",
-    // shadowOffset: {
-    //   width: 1,
-    //   height: 4,
-    // },
-    // shadowOpacity: 0.3,
-    // shadowRadius: 5.46,
-    // elevation: 9,
-    // marginBottom: 15,
   },
   qrContainer: {},
   reservationNumber: {
@@ -105,10 +164,6 @@ const styles = StyleSheet.create({
     color: "black",
     fontWeight: "bold",
     textAlign: "center",
-  },
-  selectedCard: {
-    borderWidth: 1,
-    borderColor: "#188DFD",
   },
   detailsContainer: {
     paddingVertical: 5,
@@ -140,12 +195,25 @@ const styles = StyleSheet.create({
   animatedContainer: {
     overflow: "hidden",
   },
-  fadeOut: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 50,
+  buttonContainer: {
+    flexDirection: "column",
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: "#188DFD",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    margin: 3,
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  disabledButton: {
+    backgroundColor: "gray",
   },
 });
 

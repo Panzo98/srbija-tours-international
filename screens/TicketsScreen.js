@@ -31,8 +31,9 @@ const TicketsScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState("all");
   const [storedTickets, setStoredTickets] = useState([]);
   const animatedValue = useState(new Animated.Value(0))[0];
-  const [initialLoad, setInitialLoad] = useState(true); // Novo stanje
+  const [initialLoad, setInitialLoad] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [expandedTicketId, setExpandedTicketId] = useState(null);
 
   const fetchUserToken = async () => {
     const token = await SecureStore.getItemAsync("token");
@@ -46,12 +47,12 @@ const TicketsScreen = ({ navigation }) => {
 
   useEffect(() => {
     if (isConnected && userToken) {
-      setActiveTab("all"); // Postavi početni tab na "all" kada ima internet konekcije
+      setActiveTab("all");
       setPage(1);
       dispatch({ type: "SET_LOADING" });
       getReservations(1).finally(() => {
         dispatch({ type: "DISABLE_LOADING" });
-        setInitialLoad(false); // Postavi na false nakon inicijalnog učitavanja
+        setInitialLoad(false);
       });
     } else {
       setActiveTab("stored");
@@ -218,7 +219,14 @@ const TicketsScreen = ({ navigation }) => {
             data={ticketsData}
             renderItem={({ item, index }) => (
               <View style={styles.ticketContainer}>
-                <Ticket ticket={item} key={index} />
+                <Ticket
+                  ticket={item}
+                  key={index}
+                  activeTab={activeTab}
+                  loadStoredTickets={loadStoredTickets}
+                  isExpanded={expandedTicketId === item.id_res}
+                  onToggleExpand={(id) => setExpandedTicketId(id)}
+                />
               </View>
             )}
             keyExtractor={(item) => item.id_res.toString()}
@@ -234,7 +242,7 @@ const TicketsScreen = ({ navigation }) => {
               <RefreshControl
                 refreshing={isRefreshing}
                 onRefresh={handleRefresh}
-                tintColor="#188DFD" // Boja indikatora osvežavanja
+                tintColor="#188DFD"
                 title="Povlačite za osvežavanje"
                 titleColor="#188DFD"
               />
