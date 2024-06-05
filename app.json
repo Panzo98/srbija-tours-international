@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "srbija-tours",
+    "slug": "srbija-tours",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": ["assets/**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "jsEngine": "hermes",
+      "bundleIdentifier": "com.panzo98.srbijatours"
+    },
+    "android": {
+      "jsEngine": "hermes",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.panzo98.srbijatours"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-secure-store", "expo-asset"],
+    "extra": {
+      "eas": {
+        "projectId": "6dab5666-0e39-47dc-9b2a-c8f72044afb3"
+      }
+    }
+  }
+}
