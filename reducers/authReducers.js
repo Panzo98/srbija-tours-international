@@ -6,6 +6,7 @@ const initialState = {
 function authReducer(state = initialState, action) {
   switch (action.type) {
     case "LOGIN_SUCCESS":
+      console.log(action.payload);
       return {
         ...state,
         isAuthenticated: true,
@@ -18,6 +19,8 @@ function authReducer(state = initialState, action) {
         user: {},
       };
     case "RESTORE_SESSION":
+      console.log(action.payload);
+
       return {
         ...state,
         user: action.payload,

@@ -1,53 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   View,
   Text,
-  Image,
   StyleSheet,
-  Button,
-  Alert,
   TouchableOpacity,
+  Image,
+  FlatList,
+  Alert,
+  Dimensions,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import * as SecureStore from "expo-secure-store";
 import CustomScreenHeader from "../components/CustomScreenHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAssets } from "expo-asset";
 
 const ProfileScreen = ({ navigation }) => {
-  const userFromRedux = useSelector((state) => state.auth.user);
-  const [user, setUser] = useState(userFromRedux);
-  const dispatch = useDispatch();
+  const { width, height } = Dimensions.get("window");
 
-  useEffect(() => {
-    if (userFromRedux) {
-      setUser({
-        ...userFromRedux,
-        tickets: [
-          {
-            id: 1,
-            date: "23.11.2023",
-            from: "Sarajevo",
-            destination: "Belgrade",
-            inTwoWays: false,
-          },
-          {
-            id: 2,
-            date: "05.11.2023",
-            from: "Belgrade",
-            destination: "Zagreb",
-            inTwoWays: false,
-          },
-          {
-            id: 3,
-            date: "11.11.2023",
-            from: "Zagreb",
-            destination: "Sarajevo",
-            inTwoWays: false,
-          },
-        ],
-      });
-    }
-  }, [userFromRedux]);
+  const user = useSelector((state) => state.auth.user);
+  const [assets] = useAssets([
+    require("../assets/images/company-logo-white.png"),
+  ]);
+
+  const dispatch = useDispatch();
 
   const handleLogout = async () => {
     Alert.alert(
@@ -65,7 +41,7 @@ const ProfileScreen = ({ navigation }) => {
             dispatch({ type: "LOGOUT" });
             await SecureStore.deleteItemAsync("user");
             await SecureStore.deleteItemAsync("token");
-            // navigation.navigate("Login"); // ili reset na početni ekran ako je potrebno
+            navigation.navigate("Login");
           },
         },
       ],
@@ -73,22 +49,62 @@ const ProfileScreen = ({ navigation }) => {
     );
   };
 
+  const data = [
+    { id: "1", title: "Need help?", onPress: () => {} },
+    { id: "2", title: "T&Cs", onPress: () => {} },
+    { id: "3", title: "Privacy policy", onPress: () => {} },
+    { id: "4", title: "Station Locations", onPress: () => {} },
+    { id: "5", title: "Legal Notice", onPress: () => {} },
+    { id: "6", title: "Settings", onPress: () => {} },
+    { id: "7", title: "Send us feedback!", onPress: () => {} },
+  ];
+
+  const renderItem = ({ item }) => (
+    <TouchableOpacity style={styles.item} onPress={item.onPress}>
+      <Text style={styles.itemText}>{item.title}</Text>
+    </TouchableOpacity>
+  );
+  if (!assets)
+    return (
+      <View>
+        <Text>Učitavanje</Text>
+      </View>
+    );
+
   return (
     <SafeAreaView style={styles.container}>
-      <CustomScreenHeader title="Korisnički profil" />
-      <View style={styles.contentContainer}>
-        <Image source={{ uri: user?.image }} style={styles.profileImage} />
-        <Text style={styles.text}>
-          Name: {user?.first_name} {user?.last_name}
-        </Text>
-        <Text style={styles.text}>Email: {user?.email}</Text>
-        <Text style={styles.text}>
-          Tickets history: {user?.tickets?.length}
-        </Text>
-      </View>
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>Odjavi se</Text>
+      {/* <CustomScreenHeader title="More" /> */}
+      <View style={{ flex: 1 }}>
+        <View style={styles.contentContainer}>
+          <Image source={assets[2]} style={styles.profileImage} />
+          <Text style={styles.text}>
+            {user.first_name} {user.last_name}
+          </Text>
+        </View>
+        <FlatList
+          data={data}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          style={styles.list}
+          ListFooterComponent={
+            <Text style={styles.versionText}>v. 1.0.0 (1)</Text>
+          }
+        />
+
+        <TouchableOpacity
+          style={[
+            styles.logoutButton,
+            {
+              marginHorizontal: width * 0.04,
+              borderRadius: 5,
+              height: height * 0.07,
+              alignItems: "center",
+              justifyContent: "center",
+            },
+          ]}
+          onPress={handleLogout}
+        >
+          <Text style={styles.logoutButtonText}>Log out</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -101,31 +117,42 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   contentContainer: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
+    backgroundColor: "#188DFD",
   },
   profileImage: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    marginBottom: 20,
-  },
-  text: {
-    fontSize: 18,
     marginBottom: 10,
   },
-  footer: {
-    paddingHorizontal: 20,
-    // backgroundColor: "white",
-    // borderTopWidth: 1,
-    // borderTopColor: "#adadad",
+  text: {
+    fontSize: 22,
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  list: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  item: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  itemText: {
+    fontSize: 16,
+  },
+  versionText: {
+    textAlign: "center",
+    color: "#aaa",
+    padding: 10,
   },
   logoutButton: {
     backgroundColor: "#188DFD",
     padding: 15,
-    borderRadius: 5,
     alignItems: "center",
   },
   logoutButtonText: {
