@@ -13,7 +13,7 @@ import { useAssets } from "expo-asset";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 import CustomModal from "../components/CustomModal";
-import { Ionicons } from "@expo/vector-icons"; // Import ikonica
+import { Ionicons } from "@expo/vector-icons";
 import { useFetchActions } from "../hooks/useFetchActions";
 
 const { width, height } = Dimensions.get("window");
@@ -209,11 +209,10 @@ const HomeScreen = ({ navigation }) => {
             <View style={styles.inputPickerWrapper}>
               <TouchableOpacity
                 onPress={() =>
-                  setModalInfo({
-                    isVisible: true,
-                    type: "city",
+                  navigation.navigate("SearchCityScreen", {
                     data: cities,
                     modalName: "Početna stanica",
+                    type: "departure",
                   })
                 }
                 style={styles.inputPicker}
@@ -228,11 +227,10 @@ const HomeScreen = ({ navigation }) => {
               <TouchableOpacity
                 onPress={() =>
                   searchQuery?.departure.id
-                    ? setModalInfo({
-                        isVisible: true,
-                        type: "cityDest",
+                    ? navigation.navigate("SearchCityScreen", {
                         data: destinations,
                         modalName: "Destinacija",
+                        type: "destination",
                       })
                     : Alert.alert(
                         "Greška",
