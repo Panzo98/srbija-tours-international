@@ -50,13 +50,12 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   const data = [
-    { id: "1", title: "Need help?", onPress: () => {} },
+    { id: "1", title: "Trebaš pomoć?", onPress: () => {} },
     { id: "2", title: "T&Cs", onPress: () => {} },
-    { id: "3", title: "Privacy policy", onPress: () => {} },
-    { id: "4", title: "Station Locations", onPress: () => {} },
-    { id: "5", title: "Legal Notice", onPress: () => {} },
-    { id: "6", title: "Settings", onPress: () => {} },
-    { id: "7", title: "Send us feedback!", onPress: () => {} },
+    { id: "3", title: "Politika privatnosti", onPress: () => {} },
+    { id: "4", title: "Lokacije stanica", onPress: () => {} },
+    { id: "5", title: "", onPress: () => {} },
+    { id: "6", title: "Istorija narudžbi", onPress: () => {} },
   ];
 
   const renderItem = ({ item }) => (
@@ -104,7 +103,7 @@ const ProfileScreen = ({ navigation }) => {
           ]}
           onPress={handleLogout}
         >
-          <Text style={styles.logoutButtonText}>Log out</Text>
+          <Text style={styles.logoutButtonText}>ODJAVI SE</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

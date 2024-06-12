@@ -128,6 +128,7 @@ export default function ChooseLineScreen({ navigation }) {
         <View>
           <CustomScreenHeader
             title={`${searchQuery.departure.value} - ${searchQuery.destination.value}`}
+            navigation={navigation}
           />
           <View style={styles.miniBanner}>
             <AntDesign name="calendar" size={height * 0.03} color="white" />
