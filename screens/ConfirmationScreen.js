@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,24 +7,29 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
-import { CommonActions } from "@react-navigation/native";
+import { CommonActions, useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomScreenHeader from "../components/CustomScreenHeader";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import QRCode from "react-native-qrcode-svg";
 import { useAssets } from "expo-asset";
 import { formatPrice } from "../utils/formatPrice";
-import Carousel, { Pagination } from "react-native-snap-carousel";
+import Carousel from "react-native-reanimated-carousel";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 const ConfirmationScreen = ({ navigation }) => {
   const searchQuery = useSelector((state) => state.searchReducer);
   const { passengersFullInfo } = searchQuery;
+  const dispatch = useDispatch();
   const [currentStep, setCurrentStep] = useState(0);
   const [assets] = useAssets([require("../assets/icons/arrow-down.png")]);
 
-  const carouselRef = useRef(null);
+  useFocusEffect(
+    React.useCallback(() => {
+      setCurrentStep(0);
+    }, [])
+  );
 
   const formatCategoryToDisplay = (category) => {
     switch (category) {
@@ -52,6 +57,8 @@ const ConfirmationScreen = ({ navigation }) => {
   }
 
   const handleFinish = () => {
+    dispatch({ type: "RESET_REDUCER" });
+    dispatch({ type: "RESET_PASSENGERS_INFO" });
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
@@ -60,7 +67,7 @@ const ConfirmationScreen = ({ navigation }) => {
     );
   };
 
-  const renderItem = ({ item: passenger, index }) => (
+  const renderItem = ({ item: passenger }) => (
     <View style={styles.cardContainer}>
       <View style={styles.dataContainer}>
         <Text style={styles.title}>Pregled porudžbine</Text>
@@ -114,8 +121,6 @@ const ConfirmationScreen = ({ navigation }) => {
             style={styles.qrCode}
           />
         </View>
-
-        {/* <Text style={styles.footerText}>Želimo Vam srećan put!</Text> */}
       </View>
     </View>
   );
@@ -126,54 +131,25 @@ const ConfirmationScreen = ({ navigation }) => {
         <CustomScreenHeader title={"Porudžbina"} navigation={navigation} />
         <View style={styles.carouselWrapper}>
           <Carousel
-            ref={carouselRef}
+            loop={false}
+            width={screenWidth}
+            height={screenHeight * 0.75} // Adjusted to fit above the button
             data={passengersFullInfo}
             renderItem={renderItem}
-            sliderWidth={screenWidth}
-            itemWidth={screenWidth * 0.8}
-            inactiveSlideScale={0.9}
-            inactiveSlideOpacity={0.7}
-            inactiveSlideShift={10}
-            contentContainerCustomStyle={styles.carouselContainer}
+            mode="parallax"
+            modeConfig={{
+              parallaxScrollingScale: 0.9,
+              parallaxScrollingOpacity: 0.7,
+              parallaxAdjacentItemScale: 0.8,
+            }}
             onSnapToItem={(index) => setCurrentStep(index)}
-            layout={"default"}
-          />
-          <Pagination
-            dotsLength={passengersFullInfo.length}
-            activeDotIndex={currentStep}
-            containerStyle={styles.paginationContainer}
-            dotStyle={styles.activeDot}
-            inactiveDotStyle={styles.inactiveDot}
-            inactiveDotOpacity={0.4}
-            inactiveDotScale={0.6}
           />
         </View>
 
         <View style={styles.buttonContainer}>
-          {currentStep > 0 && (
-            <TouchableOpacity
-              style={styles.navButton}
-              onPress={() => {
-                carouselRef.current.snapToPrev();
-              }}
-            >
-              <Text style={styles.navButtonText}>PRETHODNI</Text>
-            </TouchableOpacity>
-          )}
-          {currentStep < passengersFullInfo.length - 1 ? (
-            <TouchableOpacity
-              style={styles.navButton}
-              onPress={() => {
-                carouselRef.current.snapToNext();
-              }}
-            >
-              <Text style={styles.navButtonText}>SLEDEĆI</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity style={styles.navButton} onPress={handleFinish}>
-              <Text style={styles.navButtonText}>ZAVRŠI</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity style={styles.navButton} onPress={handleFinish}>
+            <Text style={styles.navButtonText}>ZAVRŠI</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     </View>
@@ -187,12 +163,12 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+    justifyContent: "space-between",
   },
   carouselWrapper: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: screenHeight * 0.02,
   },
   cardContainer: {
     shadowColor: "#000",
@@ -247,25 +223,10 @@ const styles = StyleSheet.create({
     marginTop: screenHeight * 0.01,
     justifyContent: "center",
   },
-  message: {
-    fontSize: screenHeight * 0.018,
-    marginBottom: screenHeight * 0.02,
-    marginTop: screenHeight * 0.015,
-    backgroundColor: "#d9d9d9",
-    padding: screenHeight * 0.025,
-    fontWeight: "bold",
-    textAlign: "justify",
-  },
   qrCodeContainer: {
     alignItems: "center",
     marginBottom: screenHeight * 0.01,
     marginTop: screenHeight * 0.01,
-  },
-  footerText: {
-    fontSize: screenHeight * 0.015,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: screenHeight * 0.02,
   },
   separatorLine: {
     width: "100%",
@@ -274,17 +235,13 @@ const styles = StyleSheet.create({
     marginVertical: screenHeight * 0.01,
   },
   buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     padding: screenWidth * 0.04,
-    width: "100%",
-    backgroundColor: "white",
+    marginBottom: screenHeight * 0.02,
   },
   navButton: {
     backgroundColor: "#188dfd",
     borderRadius: 5,
     alignItems: "center",
-    flex: 1,
     justifyContent: "center",
     height: screenHeight * 0.07,
   },
@@ -292,24 +249,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: screenHeight * 0.02,
     fontWeight: "bold",
-  },
-  paginationContainer: {
-    paddingVertical: screenHeight * 0.01,
-  },
-  activeDot: {
-    width: screenHeight * 0.012,
-    height: screenHeight * 0.012,
-    borderRadius: screenHeight * 0.006,
-    backgroundColor: "#188dfd",
-  },
-  inactiveDot: {
-    width: screenHeight * 0.012,
-    height: screenHeight * 0.012,
-    borderRadius: screenHeight * 0.006,
-    backgroundColor: "#c4c4c4",
-  },
-  carouselContainer: {
-    overflow: "visible",
   },
 });
 

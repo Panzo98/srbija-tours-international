@@ -1,5 +1,12 @@
 import React, { useEffect, useRef } from "react";
-import { View, Animated, Easing, StyleSheet, Dimensions } from "react-native";
+import {
+  View,
+  Animated,
+  Easing,
+  StyleSheet,
+  Dimensions,
+  Platform,
+} from "react-native";
 import { Fontisto } from "@expo/vector-icons";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
@@ -30,12 +37,8 @@ const BusLoader = () => {
 
   return (
     <View style={styles.overlay}>
-      <Animated.View
-        style={[styles.loaderContainer, { transform: [{ scale: scaleValue }] }]}
-      >
-        <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
-          <Fontisto name="bus" size={screenHeight * 0.06} color="#188DFD" />
-        </Animated.View>
+      <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+        <Fontisto name="bus" size={screenHeight * 0.06} color="#188DFD" />
       </Animated.View>
     </View>
   );
@@ -52,16 +55,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1000,
-  },
-  loaderContainer: {
-    backgroundColor: "white",
-    padding: screenWidth * 0.09,
-    borderRadius: 9,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-    elevation: 5,
   },
 });
 

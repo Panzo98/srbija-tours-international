@@ -68,6 +68,8 @@ const passengersReducer = (state = initialState, action) => {
   switch (action.type) {
     case "UPDATE_PASSENGERS_INFO":
       return (state = action.payload);
+    case "RESET_PASSENGERS_INFO":
+      return initialState;
     default:
       return state;
   }
