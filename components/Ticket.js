@@ -21,7 +21,7 @@ const Ticket = ({ ticket, activeTab, loadStoredTickets, onToggleExpand }) => {
   const [commentHeight, setCommentHeight] = useState(0);
 
   useEffect(() => {
-    const baseHeight = ticket.direction === 2 ? 240 : 180;
+    const baseHeight = ticket.direction === 2 ? 240 : 200;
     const targetHeight = selected ? baseHeight + commentHeight : 0;
     Animated.timing(heightAnim, {
       toValue: targetHeight,

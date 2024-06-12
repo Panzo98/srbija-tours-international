@@ -13,6 +13,7 @@ import CustomScreenHeader from "../components/CustomScreenHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { formatPassengersForBackend } from "../utils/formatPassengersForBackend";
+import * as SecureStore from "expo-secure-store";
 import QRCode from "react-native-qrcode-svg";
 
 const { width, height } = Dimensions.get("window");
@@ -29,48 +30,80 @@ export default function PaymentMethodScreen({ navigation }) {
     passengersFullInfo,
     email,
   } = useSelector((state) => state.searchReducer);
+  const isAuthenticated = useSelector(
+    (state) => state.authReducer.isAuthenticated
+  );
   const passengerssss = useSelector((state) => state.passengersReducer);
   const [selected, setSelected] = useState(null);
+  const dispatch = useDispatch();
 
   const handleSelect = (selectedIndex) => {
     setSelected(selectedIndex);
   };
-  const dispatch = useDispatch();
 
   const handleBuy = async () => {
     try {
       dispatch({ type: "SET_LOADING" });
-      let response = await axios.post(
-        "https://drivesoft-srbijatours.com/api/v1/reservations",
-        {
-          id_departure,
-          departure: departure.id,
-          destination: destination.id,
-          departureDate,
-          paymentMethod: selected,
-          direction,
-          total,
-          passengers: formatPassengersForBackend(passengersFullInfo),
-          email,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      dispatch({ type: "DISABLE_LOADING" });
-      Alert.alert("Uspješno", "Uspješno ste rezervisali karte");
-      let _reservation_ids = response.data.reservation_ids;
-      dispatch({
-        type: "ASSIGN_RESERVATION_IDS_TO_PASSENGERS",
-        payload: _reservation_ids,
-      });
+
+      const reservationData = {
+        id_departure,
+        departure: departure.id,
+        destination: destination.id,
+        departureDate,
+        paymentMethod: selected,
+        direction,
+        total,
+        passengers: formatPassengersForBackend(passengersFullInfo),
+        email,
+      };
+
+      if (isAuthenticated) {
+        const response = await axios.post(
+          "https://drivesoft-srbijatours.com/api/v1/reservations",
+          reservationData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const _reservation_ids = response.data.reservation_ids;
+        dispatch({
+          type: "ASSIGN_RESERVATION_IDS_TO_PASSENGERS",
+          payload: _reservation_ids,
+        });
+        Alert.alert("Uspješno", "Uspješno ste rezervisali karte");
+      } else {
+        const reservation_ids = passengersFullInfo.map(
+          (passenger, index) => `unregistered-${Date.now()}-${index}`
+        );
+
+        passengersFullInfo.forEach((passenger, index) => {
+          passenger.qrCode = `https://drivesoft-srbijatours.com/ticket/show?booking_number=${reservation_ids[index]}`;
+        });
+
+        const storedTickets =
+          JSON.parse(await SecureStore.getItemAsync("tickets")) || [];
+        await SecureStore.setItemAsync(
+          "tickets",
+          JSON.stringify([...storedTickets, ...passengersFullInfo])
+        );
+
+        dispatch({
+          type: "ASSIGN_RESERVATION_IDS_TO_PASSENGERS",
+          payload: reservation_ids,
+        });
+        Alert.alert("Uspješno", "Uspješno ste rezervisali karte");
+      }
+
+      dispatch({ type: "RESET_REDUCER" });
       navigation.navigate("ConfirmationScreen");
     } catch (error) {
       dispatch({ type: "DISABLE_LOADING" });
       Alert.alert("Greška", "Desila se greška prilikom rezervacije karte!");
       console.error(error);
+    } finally {
+      dispatch({ type: "DISABLE_LOADING" });
     }
   };
 
@@ -198,13 +231,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#188DFD",
     borderRadius: 5,
     justifyContent: "center",
-    // paddingVertical: height * 0.03,
     alignItems: "center",
     height: height * 0.07,
     marginHorizontal: width * 0.04,
-
-    // marginHorizontal: width * 0.05,
-    // marginBottom: height * 0.03,
   },
   disabledButton: {
     backgroundColor: "#B0C4DE",

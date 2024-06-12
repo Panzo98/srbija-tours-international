@@ -205,7 +205,7 @@ const HomeScreen = ({ navigation }) => {
           <CustomModal modalInfo={modalInfo} setModalInfo={setModalInfo} />
           <Image source={assets[0]} style={styles.image} />
           <View style={styles.inputContainer}>
-            <Image source={require("../assets/images/company-logo.png")} />
+            {/* <Image source={require("../assets/images/company-logo.png")} /> */}
             <Text style={styles.title}>Vaša veza sa Evropom</Text>
             <View style={styles.tripTypeContainer}>
               <TouchableOpacity

@@ -191,7 +191,7 @@ function searchReducer(state = initialState, action) {
         reservationIds: [...action.payload],
       };
     case "RESET_REDUCER":
-      return { state: initialState };
+      return initialState;
     case "SET_LOADING":
       return { ...state, loading: true };
     case "DISABLE_LOADING":
