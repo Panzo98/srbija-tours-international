@@ -7,35 +7,59 @@ import {
   Animated,
   Easing,
   Alert,
+  Dimensions,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { formatPrice } from "../utils/formatPrice";
 import * as SecureStore from "expo-secure-store";
 
-const Ticket = ({
-  ticket,
-  activeTab,
-  loadStoredTickets,
-  isExpanded,
-  onToggleExpand,
-}) => {
+const { width } = Dimensions.get("window");
+
+const Ticket = ({ ticket, activeTab, loadStoredTickets, onToggleExpand }) => {
   const [heightAnim] = useState(new Animated.Value(0));
+  const [selected, setSelected] = useState(false);
+  const [commentHeight, setCommentHeight] = useState(0);
 
   useEffect(() => {
+    const baseHeight = ticket.direction === 2 ? 240 : 180;
+    const targetHeight = selected ? baseHeight + commentHeight : 0;
     Animated.timing(heightAnim, {
-      toValue: isExpanded ? 250 : 0,
+      toValue: targetHeight,
       duration: 300,
       easing: Easing.ease,
       useNativeDriver: false,
     }).start();
-  }, [isExpanded]);
+  }, [selected, ticket.direction, commentHeight]);
+
+  useEffect(() => {
+    calculateCommentHeight(ticket.comment);
+  }, [ticket.comment]);
+
+  const calculateCommentHeight = (comment) => {
+    if (!comment) {
+      setCommentHeight(0);
+      return;
+    }
+
+    const lineHeight = 18;
+    const maxCharsPerLine = Math.floor((width - 40) / 10);
+    const numLines = Math.ceil(comment.length / maxCharsPerLine);
+    const calculatedHeight = numLines * lineHeight;
+
+    setCommentHeight(calculatedHeight);
+  };
 
   const getDirectionText = (direction) => {
     return direction === 1 ? "Jednosmjerna" : "Povratna";
   };
 
   const getUsageCountText = (usageCount) => {
-    return usageCount > 0 ? "Iskorišćena" : "Neiskorišćena";
+    return usageCount > 0 ? "Iskorištena" : "Neiskorištena";
+  };
+
+  const capitalizeFirstLetter = (sentence) => {
+    if (!sentence) return sentence;
+    return sentence.charAt(0).toUpperCase() + sentence.slice(1).toLowerCase();
   };
 
   const handleDownload = async () => {
@@ -81,7 +105,10 @@ const Ticket = ({
     <View style={{ flex: 1 }}>
       <TouchableOpacity
         style={[styles.container]}
-        onPress={() => onToggleExpand(ticket.id_res)}
+        onPress={() => {
+          onToggleExpand(ticket.id_res);
+          setSelected(!selected);
+        }}
       >
         <View style={styles.qrContainer}>
           <QRCode
@@ -109,11 +136,15 @@ const Ticket = ({
             <Text style={styles.additionalInfo}>
               Status: {getUsageCountText(ticket.usage_count)}
             </Text>
-            <Text style={styles.additionalInfo}>
-              Komentar: {ticket.comment}
+            <Text style={[styles.additionalInfo, styles.comment]}>
+              Komentar: {ticket.comment || "Bez komentara"}
             </Text>
-            <Text style={styles.additionalInfo}>Od: {ticket.from}</Text>
-            <Text style={styles.additionalInfo}>Do: {ticket.to}</Text>
+            <Text style={styles.additionalInfo}>
+              Od: {capitalizeFirstLetter(ticket.from_city)}
+            </Text>
+            <Text style={styles.additionalInfo}>
+              Do: {capitalizeFirstLetter(ticket.to_city)}
+            </Text>
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.button} onPress={handleView}>
                 <Text style={styles.buttonText}>Pregled karte</Text>
@@ -136,9 +167,7 @@ const Ticket = ({
                   style={[styles.button, styles.disabledButton]}
                   disabled={true}
                 >
-                  <Text style={styles.buttonText}>
-                    Rezerviši povratni datum
-                  </Text>
+                  <Text style={styles.buttonText}>Rezerviši povratnu</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -168,6 +197,7 @@ const styles = StyleSheet.create({
   detailsContainer: {
     paddingVertical: 5,
     marginLeft: 10,
+    flex: 1,
   },
   name: {
     fontSize: 16,
@@ -192,6 +222,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#777",
   },
+  comment: {
+    maxWidth: "100%",
+    flexWrap: "wrap",
+  },
   animatedContainer: {
     overflow: "hidden",
   },
@@ -211,6 +245,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontWeight: "bold",
+    textAlign: "center",
   },
   disabledButton: {
     backgroundColor: "gray",

@@ -41,6 +41,25 @@ const PassengerForm = ({ index, passenger }) => {
     });
   };
 
+  const handleBirthdayChange = (value) => {
+    let formattedValue = value.replace(/[^0-9]/g, "");
+
+    if (formattedValue.length > 4) {
+      formattedValue =
+        formattedValue.slice(0, 4) + "-" + formattedValue.slice(4);
+    }
+    if (formattedValue.length > 7) {
+      formattedValue =
+        formattedValue.slice(0, 7) + "-" + formattedValue.slice(7);
+    }
+
+    if (formattedValue.length > 10) {
+      formattedValue = formattedValue.slice(0, 10);
+    }
+
+    handleChange("birthday", formattedValue);
+  };
+
   const formatCategoryToDisplay = (category) => {
     switch (category) {
       case 1:
@@ -86,7 +105,8 @@ const PassengerForm = ({ index, passenger }) => {
         style={styles.input}
         placeholder="Datum rođenja: 1990-05-21"
         value={user.birthday}
-        onChangeText={(text) => handleChange("birthday", text)}
+        onChangeText={handleBirthdayChange}
+        keyboardType="numeric"
       />
       <Text style={styles.priceInfoText}>
         Karta za izabranu kategoriju iznosi

@@ -76,7 +76,7 @@ export default function PaymentMethodScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <CustomScreenHeader title={"Način plaćanja"} />
+      <CustomScreenHeader title={"Način plaćanja"} navigation={navigation} />
       <View style={styles.content}>
         <TouchableOpacity
           onPress={() => handleSelect(1)}
@@ -108,6 +108,7 @@ export default function PaymentMethodScreen({ navigation }) {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => handleSelect(2)}
+          disabled
           style={[styles.cardContainer, selected === 2 && styles.selectedCard]}
         >
           <View style={styles.cardContent}>
@@ -196,17 +197,21 @@ const styles = StyleSheet.create({
   finishButton: {
     backgroundColor: "#188DFD",
     borderRadius: 5,
-    paddingVertical: height * 0.03,
+    justifyContent: "center",
+    // paddingVertical: height * 0.03,
     alignItems: "center",
-    marginHorizontal: width * 0.05,
-    marginBottom: height * 0.03,
+    height: height * 0.07,
+    marginHorizontal: width * 0.04,
+
+    // marginHorizontal: width * 0.05,
+    // marginBottom: height * 0.03,
   },
   disabledButton: {
     backgroundColor: "#B0C4DE",
   },
   buttonText: {
     color: "white",
-    fontSize: height * 0.025,
+    fontSize: 18,
     fontWeight: "bold",
   },
 });

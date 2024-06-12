@@ -123,7 +123,7 @@ const ConfirmationScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <CustomScreenHeader title={"Porudžbina"} />
+        <CustomScreenHeader title={"Porudžbina"} navigation={navigation} />
         <View style={styles.carouselWrapper}>
           <Carousel
             ref={carouselRef}
@@ -282,11 +282,11 @@ const styles = StyleSheet.create({
   },
   navButton: {
     backgroundColor: "#188dfd",
-    padding: screenHeight * 0.02,
     borderRadius: 5,
     alignItems: "center",
     flex: 1,
-    marginHorizontal: screenWidth * 0.02,
+    justifyContent: "center",
+    height: screenHeight * 0.07,
   },
   navButtonText: {
     color: "white",

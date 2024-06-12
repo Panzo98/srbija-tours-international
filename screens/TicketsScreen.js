@@ -34,7 +34,7 @@ const TicketsScreen = ({ navigation }) => {
   const [initialLoad, setInitialLoad] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [expandedTicketId, setExpandedTicketId] = useState(null);
-
+  console.log(ticketsFromRedux);
   const fetchUserToken = async () => {
     const token = await SecureStore.getItemAsync("token");
     setUserToken(token);

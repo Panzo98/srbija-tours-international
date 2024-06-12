@@ -62,7 +62,10 @@ const PreOrderScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <CustomScreenHeader title={"Unos podataka za putnike"} />
+      <CustomScreenHeader
+        title={"Unos podataka za putnike"}
+        navigation={navigation}
+      />
       <View style={styles.container}>
         {passengers.length > 1 && (
           <View style={styles.stepperContainer}>
