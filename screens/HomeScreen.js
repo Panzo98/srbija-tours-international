@@ -23,6 +23,7 @@ const HomeScreen = ({ navigation }) => {
   const [returnDates, setReturnDates] = useState("");
   const [cities, setCities] = useState([]);
   const [destinations, setDestinations] = useState([]);
+  const [tripType, setTripType] = useState("one-way");
   const dispatch = useDispatch();
 
   const {
@@ -206,6 +207,40 @@ const HomeScreen = ({ navigation }) => {
           <View style={styles.inputContainer}>
             <Image source={require("../assets/images/company-logo.png")} />
             <Text style={styles.title}>Vaša veza sa Evropom</Text>
+            <View style={styles.tripTypeContainer}>
+              <TouchableOpacity
+                onPress={() => setTripType("one-way")}
+                style={[
+                  styles.tripTypeButton,
+                  tripType === "one-way" && styles.selectedTripTypeButton,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.tripTypeText,
+                    tripType === "one-way" && styles.selectedTripTypeText,
+                  ]}
+                >
+                  Jednosmjerna
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setTripType("round-trip")}
+                style={[
+                  styles.tripTypeButton,
+                  tripType === "round-trip" && styles.selectedTripTypeButton,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.tripTypeText,
+                    tripType === "round-trip" && styles.selectedTripTypeText,
+                  ]}
+                >
+                  Povratna
+                </Text>
+              </TouchableOpacity>
+            </View>
             <View style={styles.inputPickerWrapper}>
               <TouchableOpacity
                 onPress={() =>
@@ -245,7 +280,13 @@ const HomeScreen = ({ navigation }) => {
                 </Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.colWrapper}>
+            <View
+              style={
+                tripType === "one-way"
+                  ? styles.fullWidthPicker
+                  : styles.colWrapper
+              }
+            >
               <TouchableOpacity
                 onPress={() =>
                   searchQuery.departure.id && searchQuery.destination.id
@@ -260,38 +301,49 @@ const HomeScreen = ({ navigation }) => {
                         "Nije moguće izabrati datum polaska bez da izaberete početni grad i destinaciju!"
                       )
                 }
-                style={styles.datePicker}
+                style={
+                  tripType === "one-way"
+                    ? styles.fullDatePicker
+                    : styles.datePicker
+                }
               >
                 <Text style={styles.inputLabel}>Polazak</Text>
                 <Text style={styles.inputValue}>
                   {searchQuery.departureDate}
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  searchQuery.departure.id &&
-                  searchQuery.destination.id &&
-                  searchQuery.departureDate
-                    ? setModalInfo({
-                        isVisible: true,
-                        type: "date",
-                        data: returnDates,
-                        modalName: "Dolasci",
-                      })
-                    : Alert.alert(
-                        "Greška",
-                        "Nije moguće izabrati datum povratka bez da izaberete početni grad, destinaciju i datum polaska!"
-                      );
-                }}
-                style={styles.datePicker}
-              >
-                <Text style={styles.inputLabel}>Povratak</Text>
-                <Text style={styles.inputValue}>
-                  {searchQuery.returnDate || ""}
-                </Text>
-              </TouchableOpacity>
+              {tripType === "round-trip" && (
+                <TouchableOpacity
+                  onPress={() => {
+                    searchQuery.departure.id &&
+                    searchQuery.destination.id &&
+                    searchQuery.departureDate
+                      ? setModalInfo({
+                          isVisible: true,
+                          type: "date",
+                          data: returnDates,
+                          modalName: "Dolasci",
+                        })
+                      : Alert.alert(
+                          "Greška",
+                          "Nije moguće izabrati datum povratka bez da izaberete početni grad, destinaciju i datum polaska!"
+                        );
+                  }}
+                  style={styles.datePicker}
+                >
+                  <Text style={styles.inputLabel}>Povratak</Text>
+                  <Text style={styles.inputValue}>
+                    {searchQuery.returnDate || ""}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
-            <View style={styles.inputPickerWrapper}>
+            <View
+              style={[
+                styles.inputPickerWrapper,
+                tripType === "one-way" && { marginBottom: 0 },
+              ]}
+            >
               <TouchableOpacity
                 onPress={() =>
                   setModalInfo({
@@ -363,6 +415,32 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.03,
     textAlign: "center",
   },
+  tripTypeContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: height * 0.03,
+  },
+  tripTypeButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: "black",
+    borderRadius: 5,
+    marginHorizontal: 5,
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  selectedTripTypeButton: {
+    backgroundColor: "#188DFD",
+    borderColor: "#188DFD",
+  },
+  tripTypeText: {
+    fontSize: height * 0.02,
+  },
+  selectedTripTypeText: {
+    color: "white",
+  },
   inputPickerWrapper: {
     width: "100%",
     height: height * 0.08,
@@ -394,6 +472,19 @@ const styles = StyleSheet.create({
   datePicker: {
     width: "48%",
     marginBottom: height * 0.015,
+    borderWidth: 1,
+    padding: 10,
+    height: height * 0.08,
+    borderRadius: 5,
+    justifyContent: "center",
+    borderColor: "black",
+  },
+  fullWidthPicker: {
+    width: "100%",
+    marginBottom: height * 0.015,
+  },
+  fullDatePicker: {
+    width: "100%",
     borderWidth: 1,
     padding: 10,
     height: height * 0.08,
