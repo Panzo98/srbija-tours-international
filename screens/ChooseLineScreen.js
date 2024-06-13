@@ -24,7 +24,7 @@ export default function ChooseLineScreen({ navigation }) {
   const [prices, setPrices] = useState(null);
   const [selectedLine, setSelectedLine] = useState(null);
   const dispatch = useDispatch();
-  const { fetchPriceForRoute } = useFetchActions();
+  const { fetchPriceForRoute, fetchPriceForRoundTrip } = useFetchActions();
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -51,14 +51,27 @@ export default function ChooseLineScreen({ navigation }) {
 
   const fetchPrices = async () => {
     try {
-      let direction = 1;
-      const response = await fetchPriceForRoute(
-        direction,
-        searchQuery.departure.id,
-        searchQuery.destination.id,
-        searchQuery.departureDate,
-        convertPassengers(searchQuery.passengers)
-      );
+      let response;
+      const passengers = convertPassengers(searchQuery.passengers);
+
+      if (searchQuery.direction === 1 || !searchQuery.returnDate) {
+        response = await fetchPriceForRoute(
+          searchQuery.direction,
+          searchQuery.departure.id,
+          searchQuery.destination.id,
+          searchQuery.departureDate,
+          passengers
+        );
+      } else {
+        response = await fetchPriceForRoundTrip(
+          searchQuery.direction,
+          searchQuery.departure.id,
+          searchQuery.destination.id,
+          searchQuery.departureDate,
+          searchQuery.returnDate,
+          passengers
+        );
+      }
       setPrices(response);
       dispatch({ type: "DISABLE_LOADING" });
     } catch (error) {
@@ -88,6 +101,9 @@ export default function ChooseLineScreen({ navigation }) {
       searchQuery.departure.id,
       searchQuery.destination.id,
       searchQuery.departureDate,
+      searchQuery.returnDate,
+      searchQuery.direction,
+      searchQuery.passengers,
     ])
   );
 

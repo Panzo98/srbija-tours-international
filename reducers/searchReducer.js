@@ -65,6 +65,11 @@ function searchReducer(state = initialState, action) {
         ...state,
         departureDate: action.payload,
       };
+    case "SET_DIRECTION":
+      return {
+        ...state,
+        direction: action.payload,
+      };
     case "REMOVE_DEPARTURE_DATE":
       return {
         ...state,
@@ -97,6 +102,7 @@ function searchReducer(state = initialState, action) {
         }
         return passenger;
       });
+
       return { ...state, passengers: newPassengers };
     }
     case "PASSENGER_DECREMENT": {
@@ -106,6 +112,7 @@ function searchReducer(state = initialState, action) {
         }
         return passenger;
       });
+
       return { ...state, passengers: newPassengers };
     }
     case "SELECT_LINE":

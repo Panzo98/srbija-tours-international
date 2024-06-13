@@ -24,14 +24,14 @@ const SearchCity = ({ data, slideDown, modalName, type }) => {
 
   const handleSearch = (text) => {
     setSearchText(text);
-    if (text.length < 2) {
-      setFilteredCities([]);
-    } else {
-      const filteredData = data.filter((item) =>
-        (item.value || item.name).toLowerCase().includes(text.toLowerCase())
-      );
-      setFilteredCities(filteredData);
-    }
+    // if (text.length < 1) {
+    //   setFilteredCities([]);
+    // } else {
+    const filteredData = data.filter((item) =>
+      (item.value || item.name).toLowerCase().includes(text.toLowerCase())
+    );
+    setFilteredCities(filteredData);
+    // }
   };
 
   const clearSearch = () => {
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: screenHeight * 0.02,
-    height: screenHeight * 0.3, // Height to display "No results"
+    height: screenHeight * 0.3,
   },
   noResultsText: {
     fontSize: screenHeight * 0.022,

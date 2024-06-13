@@ -173,12 +173,20 @@ const HomeScreen = ({ navigation }) => {
       searchQuery.departure.id &&
       searchQuery.destination.id &&
       searchQuery.departureDate &&
-      finalPassengersCount > 0
+      finalPassengersCount > 0 &&
+      (searchQuery.direction === 1 ||
+        (searchQuery.direction === 2 && searchQuery.returnDate))
     ) {
       return navigation.navigate("ChooseLineScreen");
     } else {
       Alert.alert("Molimo popunite sva polja!");
     }
+  };
+
+  const handleTripTypeChange = (type) => {
+    setTripType(type);
+    const direction = type === "one-way" ? 1 : 2;
+    dispatch({ type: "SET_DIRECTION", payload: direction });
   };
 
   const formatPassengers = (passengers) => {
@@ -205,14 +213,16 @@ const HomeScreen = ({ navigation }) => {
           <CustomModal modalInfo={modalInfo} setModalInfo={setModalInfo} />
           <Image source={assets[0]} style={styles.image} />
           <View style={styles.inputContainer}>
-            {/* <Image source={require("../assets/images/company-logo.png")} /> */}
             <Text style={styles.title}>Vaša veza sa Evropom</Text>
             <View style={styles.tripTypeContainer}>
               <TouchableOpacity
-                onPress={() => setTripType("one-way")}
+                onPress={() => handleTripTypeChange("one-way")}
                 style={[
                   styles.tripTypeButton,
                   tripType === "one-way" && styles.selectedTripTypeButton,
+                  {
+                    marginRight: 5,
+                  },
                 ]}
               >
                 <Text
@@ -225,10 +235,11 @@ const HomeScreen = ({ navigation }) => {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => setTripType("round-trip")}
+                onPress={() => handleTripTypeChange("round-trip")}
                 style={[
                   styles.tripTypeButton,
                   tripType === "round-trip" && styles.selectedTripTypeButton,
+                  { marginLeft: 5 },
                 ]}
               >
                 <Text
@@ -418,15 +429,15 @@ const styles = StyleSheet.create({
   tripTypeContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: height * 0.03,
+    marginBottom: height * 0.01,
   },
   tripTypeButton: {
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    // paddingHorizontal: 20,
     borderWidth: 1,
     borderColor: "black",
     borderRadius: 5,
-    marginHorizontal: 5,
+    // marginHorizontal: 5,
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
@@ -448,7 +459,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     justifyContent: "center",
     borderColor: "black",
-    marginBottom: height * 0.015,
+    marginBottom: height * 0.01,
   },
   inputPicker: {
     width: "100%",

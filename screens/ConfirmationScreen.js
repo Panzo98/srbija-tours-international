@@ -7,7 +7,11 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
-import { CommonActions, useFocusEffect } from "@react-navigation/native";
+import {
+  CommonActions,
+  useFocusEffect,
+  useNavigation,
+} from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomScreenHeader from "../components/CustomScreenHeader";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,17 +22,22 @@ import Carousel from "react-native-reanimated-carousel";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
-const ConfirmationScreen = ({ navigation }) => {
+const ConfirmationScreen = () => {
   const searchQuery = useSelector((state) => state.searchReducer);
   const { passengersFullInfo } = searchQuery;
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const [currentStep, setCurrentStep] = useState(0);
   const [assets] = useAssets([require("../assets/icons/arrow-down.png")]);
 
   useFocusEffect(
     React.useCallback(() => {
       setCurrentStep(0);
-    }, [])
+      return () => {
+        dispatch({ type: "RESET_REDUCER" });
+        dispatch({ type: "RESET_PASSENGERS_INFO" });
+      };
+    }, [dispatch])
   );
 
   const formatCategoryToDisplay = (category) => {
@@ -125,27 +134,32 @@ const ConfirmationScreen = ({ navigation }) => {
     </View>
   );
 
+  console.log("passengersFullInfo:", passengersFullInfo);
+
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <CustomScreenHeader title={"Porudžbina"} navigation={navigation} />
         <View style={styles.carouselWrapper}>
-          <Carousel
-            loop={false}
-            width={screenWidth}
-            height={screenHeight * 0.75} // Adjusted to fit above the button
-            data={passengersFullInfo}
-            renderItem={renderItem}
-            mode="parallax"
-            modeConfig={{
-              parallaxScrollingScale: 0.9,
-              parallaxScrollingOpacity: 0.7,
-              parallaxAdjacentItemScale: 0.8,
-            }}
-            onSnapToItem={(index) => setCurrentStep(index)}
-          />
+          {passengersFullInfo && passengersFullInfo.length > 0 ? (
+            <Carousel
+              loop={false}
+              width={screenWidth}
+              height={screenHeight * 0.75}
+              data={passengersFullInfo}
+              renderItem={renderItem}
+              mode="parallax"
+              modeConfig={{
+                parallaxScrollingScale: 0.9,
+                parallaxScrollingOpacity: 0.7,
+                parallaxAdjacentItemScale: 0.8,
+              }}
+              onSnapToItem={(index) => setCurrentStep(index)}
+            />
+          ) : (
+            <Text>Nema dostupnih informacija o putnicima.</Text>
+          )}
         </View>
-
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.navButton} onPress={handleFinish}>
             <Text style={styles.navButtonText}>ZAVRŠI</Text>
@@ -169,6 +183,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: screenHeight * 0.02,
   },
   cardContainer: {
     shadowColor: "#000",
@@ -236,7 +251,6 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     padding: screenWidth * 0.04,
-    marginBottom: screenHeight * 0.02,
   },
   navButton: {
     backgroundColor: "#188dfd",

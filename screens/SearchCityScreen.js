@@ -37,14 +37,10 @@ const SearchCityScreen = ({ route, navigation }) => {
 
   const handleSearch = (text) => {
     setSearchText(text);
-    if (text.length < 2) {
-      setFilteredCities([]);
-    } else if (data) {
-      const filteredData = data.filter((item) =>
-        (item.value || item.name).toLowerCase().includes(text.toLowerCase())
-      );
-      setFilteredCities(filteredData);
-    }
+    const filteredData = data.filter((item) =>
+      (item.value || item.name).toLowerCase().includes(text.toLowerCase())
+    );
+    setFilteredCities(filteredData);
   };
 
   const clearSearch = () => {
@@ -125,7 +121,7 @@ const SearchCityScreen = ({ route, navigation }) => {
         </View>
       </View>
       <View style={styles.container}>
-        {searchText.length >= 2 && (
+        {searchText.length > 0 && (
           <Animated.View
             style={[styles.resultsContainer, { height: animatedHeight }]}
           >
@@ -135,25 +131,11 @@ const SearchCityScreen = ({ route, navigation }) => {
             >
               {filteredCities.length > 0 ? (
                 filteredCities.map((item) => (
-                  <TouchableOpacity
+                  <CityItem
                     key={item.key || item.id_city}
+                    item={item}
                     onPress={() => selectCity(item)}
-                    style={styles.cityItem}
-                  >
-                    <MaterialCommunityIcons
-                      name="city-variant"
-                      size={24}
-                      color={"#999"}
-                    />
-                    <View style={styles.cityTextContainer}>
-                      <Text style={styles.cityText}>
-                        {item.value || item.name}
-                      </Text>
-                      <Text style={styles.countryText}>
-                        {getCountry(item.value || item.name)}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
+                  />
                 ))
               ) : (
                 <View style={styles.noResults}>
@@ -165,6 +147,32 @@ const SearchCityScreen = ({ route, navigation }) => {
         )}
       </View>
     </SafeAreaView>
+  );
+};
+
+const CityItem = ({ item, onPress }) => {
+  const heightAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(heightAnim, {
+      toValue: screenHeight * 0.1,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, []);
+
+  return (
+    <Animated.View style={{ height: heightAnim, overflow: "hidden" }}>
+      <TouchableOpacity onPress={onPress} style={styles.cityItem}>
+        <MaterialCommunityIcons name="city-variant" size={24} color={"#999"} />
+        <View style={styles.cityTextContainer}>
+          <Text style={styles.cityText}>{item.value || item.name}</Text>
+          <Text style={styles.countryText}>
+            {getCountry(item.value || item.name)}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
