@@ -189,7 +189,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     flex: 1,
-    // marginHorizontal: width * 0.02, TODO odvojiti buttons
   },
   disabledButton: {
     backgroundColor: "#B0C4DE",

@@ -135,13 +135,17 @@ export const useFetchActions = () => {
   ) => {
     try {
       dispatch({ type: "SET_LOADING" });
-
+      console.log("passengers:", passengers);
+      console.log("direction:", direction);
+      console.log("city1:", city1);
+      console.log("city2:", city2);
+      console.log("date:", date);
       const response = await axios.get(
         `/price/${direction}/${city1}/${city2}/${date}/[${passengers}]`
       );
       console.log("fetchPriceForRoute done");
       dispatch({ type: "DISABLE_LOADING" });
-
+      console.log("fetchPriceForRoute response:", response);
       return response.data;
     } catch (error) {
       dispatch({ type: "DISABLE_LOADING" });

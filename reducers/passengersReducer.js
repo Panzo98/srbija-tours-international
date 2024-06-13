@@ -17,15 +17,7 @@ const initialState = [
     birthday: "",
     price_rsd: 7375,
   },
-  {
-    category: 4,
-    categoryTitle: "Mladi 12-26",
-    name: "",
-    lastName: "",
-    phone: "",
-    birthday: "",
-    price_rsd: 13275,
-  },
+
   {
     category: 4,
     categoryTitle: "Mladi 12-26",
@@ -44,15 +36,7 @@ const initialState = [
     birthday: "",
     price_rsd: 14750,
   },
-  {
-    category: 1,
-    categoryTitle: "Odrasli 26-60",
-    name: "",
-    lastName: "",
-    phone: "",
-    birthday: "",
-    price_rsd: 14750,
-  },
+
   {
     category: 5,
     categoryTitle: "Seniori 60+",

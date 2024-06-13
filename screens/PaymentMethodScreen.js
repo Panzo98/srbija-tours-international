@@ -14,7 +14,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { formatPassengersForBackend } from "../utils/formatPassengersForBackend";
 import * as SecureStore from "expo-secure-store";
-import QRCode from "react-native-qrcode-svg";
 
 const { width, height } = Dimensions.get("window");
 
@@ -30,9 +29,7 @@ export default function PaymentMethodScreen({ navigation }) {
     passengersFullInfo,
     email,
   } = useSelector((state) => state.searchReducer);
-  const isAuthenticated = useSelector(
-    (state) => state.authReducer.isAuthenticated
-  );
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const passengerssss = useSelector((state) => state.passengersReducer);
   const [selected, setSelected] = useState(null);
   const dispatch = useDispatch();
@@ -96,7 +93,7 @@ export default function PaymentMethodScreen({ navigation }) {
         Alert.alert("Uspješno", "Uspješno ste rezervisali karte");
       }
 
-      dispatch({ type: "RESET_REDUCER" });
+      // dispatch({ type: "RESET_REDUCER" });
       navigation.navigate("ConfirmationScreen");
     } catch (error) {
       dispatch({ type: "DISABLE_LOADING" });
