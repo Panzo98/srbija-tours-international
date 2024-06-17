@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     backgroundColor: "#83C0F9",
-    borderRadius: 5,
+    borderRadius: 50,
     marginBottom: screenHeight * 0.02,
     paddingHorizontal: screenWidth * 0.04,
     height: screenHeight * 0.07,
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "white",
-    borderRadius: 5,
+    borderRadius: 50,
   },
   loginBtnText: {
     fontSize: screenHeight * 0.025,

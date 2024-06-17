@@ -217,20 +217,22 @@ const TicketsScreen = ({ navigation }) => {
         <View style={styles.container}>
           <FlatList
             data={ticketsData}
-            renderItem={({ item, index }) => (
-              <View style={styles.ticketContainer}>
-                <Ticket
-                  ticket={item}
-                  key={index}
-                  activeTab={activeTab}
-                  loadStoredTickets={loadStoredTickets}
-                  isExpanded={expandedTicketId === item.id_res}
-                  onToggleExpand={(id) => setExpandedTicketId(id)}
-                />
-              </View>
-            )}
+            renderItem={({ item, index }) =>
+              item && (
+                <View style={styles.ticketContainer}>
+                  <Ticket
+                    ticket={item}
+                    key={index}
+                    activeTab={activeTab}
+                    loadStoredTickets={loadStoredTickets}
+                    isExpanded={expandedTicketId === item.id_res}
+                    onToggleExpand={(id) => setExpandedTicketId(id)}
+                  />
+                </View>
+              )
+            }
             keyExtractor={(item, index) =>
-              item.id_res ? item.id_res.toString() : index.toString()
+              item?.id_res ? item.id_res.toString() : index.toString()
             }
             ListEmptyComponent={
               activeTab === "all"
