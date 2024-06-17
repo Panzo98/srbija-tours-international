@@ -34,7 +34,7 @@ const TicketsScreen = ({ navigation }) => {
   const [initialLoad, setInitialLoad] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [expandedTicketId, setExpandedTicketId] = useState(null);
-  console.log(ticketsFromRedux);
+
   const fetchUserToken = async () => {
     const token = await SecureStore.getItemAsync("token");
     setUserToken(token);
@@ -229,7 +229,9 @@ const TicketsScreen = ({ navigation }) => {
                 />
               </View>
             )}
-            keyExtractor={(item) => item.id_res.toString()}
+            keyExtractor={(item, index) =>
+              item.id_res ? item.id_res.toString() : index.toString()
+            }
             ListEmptyComponent={
               activeTab === "all"
                 ? allTicketsEmptyComponent

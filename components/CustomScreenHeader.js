@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#188DFD",
-    height: screenHeight * 0.12,
+    height: screenHeight * 0.11,
     flexDirection: "row",
   },
   backButton: {
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   },
   miniBannerTxt: {
     color: "white",
-    fontSize: screenHeight * 0.025,
+    fontSize: screenHeight * 0.021,
     fontWeight: "bold",
     paddingVertical: screenHeight * 0.005,
   },

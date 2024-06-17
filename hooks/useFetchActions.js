@@ -9,6 +9,7 @@ export const useFetchActions = () => {
     dispatch({ type: "SET_LOADING" });
     try {
       const response = await axios.get("/all_cities");
+      console.log("fetchAllCities done");
       dispatch({ type: "DISABLE_LOADING" });
       return response.data;
     } catch (error) {

@@ -16,7 +16,7 @@ const initialState = {
     { count: 0, categoryId: 5, label: "Stariji 60+", shortLabel: "Stariji" },
   ],
   passengersFullInfo: [],
-  email: "aco.panzalovic@gmai.com",
+  email: "",
   tickets: [],
 };
 
@@ -86,6 +86,7 @@ function searchReducer(state = initialState, action) {
         returnDate: null,
       };
     case "SET_EMAIL":
+      console.log("SET_EMAIL", action.payload);
       return {
         ...state,
         email: action.payload,

@@ -12,11 +12,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Modal,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { useDispatch } from "react-redux";
 import { Feather } from "@expo/vector-icons";
 import { useAssets } from "expo-asset";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { format } from "date-fns";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -32,6 +36,9 @@ const RegisterScreen = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [birthDay, setBirthDay] = useState(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [tempBirthDay, setTempBirthDay] = useState(new Date());
 
   const dispatch = useDispatch();
 
@@ -65,6 +72,7 @@ const RegisterScreen = ({ navigation }) => {
           email,
           password,
           password_confirmation: confirmPassword,
+          birth_date: birthDay ? format(birthDay, "yyyy-MM-dd") : null,
         },
         {
           headers: {
@@ -72,9 +80,10 @@ const RegisterScreen = ({ navigation }) => {
           },
         }
       );
-      const { access_token, message } = response.data;
+      console.log("REGISTRACIJA", response.data);
+      const { access_token, message, user } = response.data;
       dispatch({ type: "DISABLE_LOADING" });
-      dispatch({ type: "LOGIN_SUCCESS", payload: access_token });
+      dispatch({ type: "LOGIN_SUCCESS", payload: user });
       saveData("token", access_token);
       Alert.alert("Register Status", message);
     } catch (error) {
@@ -91,6 +100,21 @@ const RegisterScreen = ({ navigation }) => {
     });
   };
 
+  const onChangeDate = (event, selectedDate) => {
+    if (selectedDate) {
+      setTempBirthDay(selectedDate);
+    }
+  };
+
+  const confirmDate = () => {
+    setBirthDay(tempBirthDay);
+    setShowDatePicker(false);
+  };
+
+  const displayDate = birthDay
+    ? format(birthDay, "yyyy-MM-dd")
+    : "Datum rođenja";
+
   if (!assets)
     return (
       <View>
@@ -99,105 +123,144 @@ const RegisterScreen = ({ navigation }) => {
     );
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <ScrollView contentContainerStyle={styles.container}>
-        <Image source={assets[0]} style={styles.image} />
-        <View style={styles.inputContainer}>
-          <Feather name="user" size={24} color="white" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Ime korisnika"
-            value={firstName}
-            onChangeText={setFirstName}
-            autoCapitalize="none"
-            placeholderTextColor="white"
-          />
-        </View>
-        <View style={styles.inputContainer}>
-          <Feather name="user" size={24} color="white" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Prezime korisnika"
-            value={lastName}
-            onChangeText={setLastName}
-            autoCapitalize="none"
-            placeholderTextColor="white"
-          />
-        </View>
-        <View style={styles.inputContainer}>
-          <Feather name="phone" size={24} color="white" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Broj telefona"
-            value={phone}
-            onChangeText={setPhone}
-            autoCapitalize="none"
-            placeholderTextColor="white"
-          />
-        </View>
-        <View style={styles.inputContainer}>
-          <Feather name="mail" size={24} color="white" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            placeholderTextColor="white"
-          />
-        </View>
-        <View style={styles.inputContainer}>
-          <Feather name="lock" size={24} color="white" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Lozinka"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            placeholderTextColor="white"
-          />
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#188DFD" }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView contentContainerStyle={styles.container}>
+          <Image source={assets[0]} style={styles.image} />
+          <View style={styles.inputContainer}>
+            <Feather name="user" size={24} color="white" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Ime korisnika"
+              value={firstName}
+              onChangeText={setFirstName}
+              autoCapitalize="none"
+              placeholderTextColor="white"
+            />
+          </View>
+          <View style={styles.inputContainer}>
+            <Feather name="user" size={24} color="white" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Prezime korisnika"
+              value={lastName}
+              onChangeText={setLastName}
+              autoCapitalize="none"
+              placeholderTextColor="white"
+            />
+          </View>
+          <View style={styles.inputContainer}>
+            <Feather name="phone" size={24} color="white" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Broj telefona"
+              value={phone}
+              onChangeText={setPhone}
+              autoCapitalize="none"
+              placeholderTextColor="white"
+            />
+          </View>
+          <View style={styles.inputContainer}>
+            <Feather name="mail" size={24} color="white" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              placeholderTextColor="white"
+            />
+          </View>
+          <View style={styles.inputContainer}>
+            <Feather name="lock" size={24} color="white" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Lozinka"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              placeholderTextColor="white"
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Feather
+                name={showPassword ? "eye-off" : "eye"}
+                size={24}
+                color="white"
+              />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.inputContainer}>
+            <Feather name="lock" size={24} color="white" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Ponovite lozinku"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showConfirmPassword}
+              placeholderTextColor="white"
+            />
+            <TouchableOpacity
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              <Feather
+                name={showConfirmPassword ? "eye-off" : "eye"}
+                size={24}
+                color="white"
+              />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.inputContainer}>
             <Feather
-              name={showPassword ? "eye-off" : "eye"}
+              name="calendar"
               size={24}
               color="white"
+              style={styles.icon}
             />
+            <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+              <Text style={styles.dateText}>{displayDate}</Text>
+            </TouchableOpacity>
+          </View>
+          {showDatePicker && (
+            <Modal
+              transparent={true}
+              animationType="slide"
+              visible={showDatePicker}
+              onRequestClose={() => setShowDatePicker(false)}
+            >
+              <View style={styles.datePickerContainer}>
+                <View style={styles.datePicker}>
+                  <DateTimePicker
+                    value={tempBirthDay}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={onChangeDate}
+                    maximumDate={new Date()}
+                  />
+                  <TouchableOpacity
+                    style={styles.confirmButton}
+                    onPress={confirmDate}
+                  >
+                    <Text style={styles.confirmButtonText}>Potvrdi</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+          )}
+          <TouchableOpacity style={styles.regBtn} onPress={handleRegister}>
+            <Text style={styles.regBtnText}>Kreiraj nalog</Text>
           </TouchableOpacity>
-        </View>
-        <View style={styles.inputContainer}>
-          <Feather name="lock" size={24} color="white" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Ponovite lozinku"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry={!showConfirmPassword}
-            placeholderTextColor="white"
-          />
-          <TouchableOpacity
-            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-          >
-            <Feather
-              name={showConfirmPassword ? "eye-off" : "eye"}
-              size={24}
-              color="white"
-            />
-          </TouchableOpacity>
-        </View>
-        <TouchableOpacity style={styles.regBtn} onPress={handleRegister}>
-          <Text style={styles.regBtnText}>Kreiraj nalog</Text>
-        </TouchableOpacity>
-        <View style={styles.btnRegContainer}>
-          <TouchableOpacity onPress={handleToLogin}>
-            <Text style={styles.loginText}>Već imaš nalog? Prijavi se</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          <View style={styles.btnRegContainer}>
+            <TouchableOpacity onPress={handleToLogin}>
+              <Text style={styles.loginText}>Već imaš nalog? Prijavi se</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -210,7 +273,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#188DFD",
   },
   image: {
-    marginBottom: screenHeight * 0.07,
+    // marginBottom: screenHeight * 0.0,
     width: screenWidth * 0.6,
     height: screenHeight * 0.1,
     resizeMode: "contain",
@@ -233,6 +296,11 @@ const styles = StyleSheet.create({
     fontSize: screenHeight * 0.02,
     color: "#fff",
   },
+  dateText: {
+    fontSize: screenHeight * 0.02,
+    color: "#fff",
+    paddingVertical: screenHeight * 0.02,
+  },
   regBtn: {
     height: screenHeight * 0.07,
     width: "100%",
@@ -248,12 +316,34 @@ const styles = StyleSheet.create({
   },
   btnRegContainer: {
     width: "100%",
-    // alignItems: "center",
     marginTop: screenHeight * 0.035,
   },
   loginText: {
     color: "white",
     fontWeight: "bold",
+    fontSize: screenHeight * 0.02,
+  },
+  datePickerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  datePicker: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  confirmButton: {
+    marginTop: 10,
+    backgroundColor: "#188DFD",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  confirmButtonText: {
+    color: "white",
     fontSize: screenHeight * 0.02,
   },
 });
