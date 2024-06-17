@@ -51,7 +51,7 @@ const MainTabNavigator = () => {
             tabBarHideOnKeyboard: true,
             headerShown: false,
             tabBarStyle: {
-              backgroundColor: "white",
+              backgroundColor: "dodgerblue",
               height: 70,
               paddingBottom: 10,
               borderTopColor: "#adadad",
@@ -59,24 +59,23 @@ const MainTabNavigator = () => {
             tabBarLabelStyle: {
               display: "none",
             },
-            tabBarActiveTintColor: "dodgerblue",
-            tabBarInactiveTintColor: "gray",
+            tabBarInactiveTintColor: "white",
             tabBarIcon: ({ color, size, focused }) => {
               let iconName;
               let iconType;
               let iconSize = isLargeScreen ? 40 : 28;
 
               if (route.name === "Home") {
-                iconName = focused ? "home" : "home-outline";
+                iconName = "home";
                 iconType = Ionicons;
               } else if (route.name === "Tickets") {
-                iconName = focused ? "ticket" : "ticket-outline";
+                iconName = "ticket";
                 iconType = Ionicons;
               } else if (route.name === "Terms") {
-                iconName = focused ? "infocirlce" : "infocirlceo";
+                iconName = "infocirlce";
                 iconType = AntDesign;
               } else if (route.name === "ProfileStack") {
-                iconName = focused ? "account" : "account-outline";
+                iconName = "account";
                 iconType = MaterialCommunityIcons;
               }
 
