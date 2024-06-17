@@ -59,6 +59,7 @@ const MainTabNavigator = () => {
             tabBarLabelStyle: {
               display: "none",
             },
+            tabBarActiveTintColor: "white",
             tabBarInactiveTintColor: "white",
             tabBarIcon: ({ color, size, focused }) => {
               let iconName;
