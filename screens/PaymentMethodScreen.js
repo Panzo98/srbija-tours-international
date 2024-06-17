@@ -29,20 +29,23 @@ export default function PaymentMethodScreen({ navigation }) {
     passengersFullInfo,
     email,
   } = useSelector((state) => state.searchReducer);
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const isAuthenticated = useSelector((state) => state.auth);
   const passengerssss = useSelector((state) => state.passengersReducer);
   const [selected, setSelected] = useState(null);
   const dispatch = useDispatch();
 
-  const handleSelect = (selectedIndex) => {
+  const handleSelect = async (selectedIndex) => {
+    console.log(await SecureStore.getItemAsync("tickets"));
     setSelected(selectedIndex);
   };
 
   const handleBuy = async () => {
     try {
       dispatch({ type: "SET_LOADING" });
-
       const reservationData = {
+        passenger_id: isAuthenticated.isAuthenticated
+          ? isAuthenticated.user.id
+          : null,
         id_departure,
         departure: departure.id,
         destination: destination.id,
@@ -53,47 +56,13 @@ export default function PaymentMethodScreen({ navigation }) {
         passengers: formatPassengersForBackend(passengersFullInfo),
         email,
       };
-
-      if (isAuthenticated) {
-        const response = await axios.post(
-          "https://drivesoft-srbijatours.com/api/v1/reservations",
-          reservationData,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const _reservation_ids = response.data.reservation_ids;
-        dispatch({
-          type: "ASSIGN_RESERVATION_IDS_TO_PASSENGERS",
-          payload: _reservation_ids,
-        });
-        Alert.alert("Uspješno", "Uspješno ste rezervisali karte");
+      console.log(reservationData);
+      if (isAuthenticated.isAuthenticated) {
+        await handleAuthenticatedUser(reservationData);
       } else {
-        const reservation_ids = passengersFullInfo.map(
-          (passenger, index) => `unregistered-${Date.now()}-${index}`
-        );
-
-        passengersFullInfo.forEach((passenger, index) => {
-          passenger.qrCode = `https://drivesoft-srbijatours.com/ticket/show?booking_number=${reservation_ids[index]}`;
-        });
-
-        const storedTickets =
-          JSON.parse(await SecureStore.getItemAsync("tickets")) || [];
-        await SecureStore.setItemAsync(
-          "tickets",
-          JSON.stringify([...storedTickets, ...passengersFullInfo])
-        );
-
-        dispatch({
-          type: "ASSIGN_RESERVATION_IDS_TO_PASSENGERS",
-          payload: reservation_ids,
-        });
-        Alert.alert("Uspješno", "Uspješno ste rezervisali karte");
+        await handleUnauthenticatedUser(reservationData);
       }
 
-      // dispatch({ type: "RESET_REDUCER" });
       navigation.navigate("ConfirmationScreen");
     } catch (error) {
       dispatch({ type: "DISABLE_LOADING" });
@@ -101,6 +70,57 @@ export default function PaymentMethodScreen({ navigation }) {
       console.error(error);
     } finally {
       dispatch({ type: "DISABLE_LOADING" });
+    }
+  };
+
+  const handleAuthenticatedUser = async (reservationData) => {
+    try {
+      const response = await axios.post(
+        "https://drivesoft-srbijatours.com/api/v1/reservations",
+        reservationData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const _reservation_ids = response.data.reservation_ids;
+      dispatch({
+        type: "ASSIGN_RESERVATION_IDS_TO_PASSENGERS",
+        payload: _reservation_ids,
+      });
+      Alert.alert("Uspješno", "Uspješno ste rezervisali karte");
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const handleUnauthenticatedUser = async (reservationData) => {
+    try {
+      const response = await axios.post(
+        "https://drivesoft-srbijatours.com/api/v1/reservations",
+        reservationData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const storedTickets =
+        JSON.parse(await SecureStore.getItemAsync("tickets")) || [];
+      await SecureStore.setItemAsync(
+        "tickets",
+        JSON.stringify([...storedTickets, response.data.tickets])
+      );
+
+      dispatch({
+        type: "ASSIGN_RESERVATION_IDS_TO_PASSENGERS",
+        payload: response.data.reservation_ids,
+      });
+      Alert.alert("Uspješno", "Uspješno ste rezervisali karte");
+    } catch (error) {
+      throw error;
     }
   };
 

@@ -99,7 +99,9 @@ const Ticket = ({ ticket, activeTab, loadStoredTickets, onToggleExpand }) => {
     }
   };
 
-  const handleView = () => {};
+  const handleView = () => {
+    console.log("Viewing ticket", ticket);
+  };
 
   return (
     <View style={{ flex: 1 }}>

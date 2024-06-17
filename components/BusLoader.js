@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import {
   View,
+  Text,
   Animated,
   Easing,
   StyleSheet,
@@ -15,21 +16,26 @@ const BusLoader = () => {
   const scaleValue = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    console.log("BusLoader mounted");
+
     const animate = () => {
-      Animated.sequence([
-        Animated.timing(scaleValue, {
-          toValue: 1.4,
-          duration: 500,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleValue, {
-          toValue: 1,
-          duration: 500,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        }),
-      ]).start(() => animate());
+      console.log("Starting animation");
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(scaleValue, {
+            toValue: 1.4,
+            duration: 500,
+            easing: Easing.linear,
+            useNativeDriver: false,
+          }),
+          Animated.timing(scaleValue, {
+            toValue: 1,
+            duration: 500,
+            easing: Easing.linear,
+            useNativeDriver: false,
+          }),
+        ])
+      ).start();
     };
 
     animate();
@@ -37,7 +43,10 @@ const BusLoader = () => {
 
   return (
     <View style={styles.overlay}>
-      <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+      {/* <Text style={styles.loadingText}>Učitavanje</Text> */}
+      <Animated.View
+        style={[styles.iconContainer, { transform: [{ scale: scaleValue }] }]}
+      >
         <Fontisto name="bus" size={screenHeight * 0.06} color="#188DFD" />
       </Animated.View>
     </View>
@@ -55,6 +64,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1000,
+    elevation: Platform.OS === "android" ? 5 : 0,
+  },
+  loadingText: {
+    color: "white",
+    fontSize: screenHeight * 0.03,
+    marginBottom: 20,
+  },
+  iconContainer: {
+    width: screenHeight * 0.06,
+    height: screenHeight * 0.06,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

@@ -4,39 +4,35 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   FlatList,
   Alert,
+  Linking,
   Dimensions,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import * as SecureStore from "expo-secure-store";
 import CustomScreenHeader from "../components/CustomScreenHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAssets } from "expo-asset";
 
 const ProfileScreen = ({ navigation }) => {
   const { width, height } = Dimensions.get("window");
 
   const user = useSelector((state) => state.auth.user);
-  const [assets] = useAssets([
-    require("../assets/images/company-logo-white.png"),
-  ]);
 
   const dispatch = useDispatch();
 
   const handleLogout = async () => {
     Alert.alert(
-      "Confirm",
-      "Are you sure you want to log out?",
+      "Potvrda",
+      "Da li zelite da se odjavite?",
       [
         {
-          text: "No",
+          text: "Ne",
           onPress: () => console.log("Logout cancelled"),
           style: "cancel",
         },
         {
-          text: "Yes",
+          text: "Da",
           onPress: async () => {
             dispatch({ type: "LOGOUT" });
             await SecureStore.deleteItemAsync("user");
@@ -49,13 +45,33 @@ const ProfileScreen = ({ navigation }) => {
     );
   };
 
+  const openURL = async (url) => {
+    const supported = await Linking.canOpenURL(url);
+    if (supported) {
+      Linking.openURL(url).catch((err) =>
+        console.error("Error opening URL:", err)
+      );
+    } else {
+      Alert.alert("Error", `Unable to open URL: ${url}`);
+    }
+  };
+
   const data = [
-    { id: "1", title: "Trebaš pomoć?", onPress: () => {} },
-    { id: "2", title: "T&Cs", onPress: () => {} },
-    { id: "3", title: "Politika privatnosti", onPress: () => {} },
-    { id: "4", title: "Lokacije stanica", onPress: () => {} },
-    { id: "5", title: "", onPress: () => {} },
-    { id: "6", title: "Istorija narudžbi", onPress: () => {} },
+    {
+      id: "1",
+      title: "Trebaš pomoć?",
+      onPress: () => openURL("tel:+381648266044"),
+    },
+    {
+      id: "2",
+      title: "Lokacije stanica",
+      onPress: () => openURL("https://srbijatours.com/poslovnice/"),
+    },
+    {
+      id: "3",
+      title: "Podrška za rezervacije",
+      onPress: () => openURL("tel:+381648266000"),
+    },
   ];
 
   const renderItem = ({ item }) => (
@@ -63,22 +79,26 @@ const ProfileScreen = ({ navigation }) => {
       <Text style={styles.itemText}>{item.title}</Text>
     </TouchableOpacity>
   );
-  if (!assets)
-    return (
-      <View>
-        <Text>Učitavanje</Text>
-      </View>
-    );
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <CustomScreenHeader title="More" /> */}
       <View style={{ flex: 1 }}>
         <View style={styles.contentContainer}>
-          <Image source={assets[2]} style={styles.profileImage} />
           <Text style={styles.text}>
             {user.first_name} {user.last_name}
           </Text>
+          <View style={styles.infoContainer}>
+            <Text style={styles.infoLabel}>Email:</Text>
+            <Text style={styles.infoText}>{user.email}</Text>
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={styles.infoLabel}>Datum rođenja:</Text>
+            <Text style={styles.infoText}>{user.birth_date}</Text>
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={styles.infoLabel}>Telefon:</Text>
+            <Text style={styles.infoText}>{user.phone}</Text>
+          </View>
         </View>
         <FlatList
           data={data}
@@ -89,7 +109,6 @@ const ProfileScreen = ({ navigation }) => {
             <Text style={styles.versionText}>v. 1.0.0 (1)</Text>
           }
         />
-
         <TouchableOpacity
           style={[
             styles.logoutButton,
@@ -120,17 +139,28 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
     backgroundColor: "#188DFD",
-  },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 10,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   text: {
     fontSize: 22,
     color: "#fff",
     fontWeight: "bold",
+  },
+  infoContainer: {
+    flexDirection: "row",
+    marginTop: 5,
+    marginBottom: 5,
+  },
+  infoLabel: {
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: "bold",
+    marginRight: 5,
+  },
+  infoText: {
+    fontSize: 16,
+    color: "#fff",
   },
   list: {
     flex: 1,

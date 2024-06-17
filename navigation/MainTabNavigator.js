@@ -14,6 +14,7 @@ import PaymentMethodScreen from "../screens/PaymentMethodScreen";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import SearchCityScreen from "../screens/SearchCityScreen";
+import EnterEmailScreen from "../screens/EnterEmailScreen";
 import { useSelector } from "react-redux";
 import {
   Ionicons,
@@ -128,6 +129,11 @@ const MainTabNavigator = () => {
           <Tab.Screen
             name="SearchCityScreen"
             component={SearchCityScreen}
+            options={{ tabBarButton: () => null }}
+          />
+          <Tab.Screen
+            name="EnterEmailScreen"
+            component={EnterEmailScreen}
             options={{ tabBarButton: () => null }}
           />
         </Tab.Navigator>

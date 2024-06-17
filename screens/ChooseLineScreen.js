@@ -23,6 +23,7 @@ const { width, height } = Dimensions.get("window");
 export default function ChooseLineScreen({ navigation }) {
   const [prices, setPrices] = useState(null);
   const [selectedLine, setSelectedLine] = useState(null);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const dispatch = useDispatch();
   const { fetchPriceForRoute, fetchPriceForRoundTrip } = useFetchActions();
 
@@ -135,7 +136,11 @@ export default function ChooseLineScreen({ navigation }) {
       type: "UPDATE_PASSENGERS_INFO",
       payload: selectedLine.passCatPriceSr,
     });
-    navigation.navigate("PreOrderScreen");
+    if (isAuthenticated) {
+      navigation.navigate("PreOrderScreen");
+    } else {
+      navigation.navigate("EnterEmailScreen");
+    }
   };
 
   return (
@@ -207,9 +212,11 @@ const styles = StyleSheet.create({
   nextButton: {
     backgroundColor: "#188DFD",
     borderRadius: 5,
-    paddingVertical: height * 0.02,
+    height: height * 0.07,
+    justifyContent: "center",
     alignItems: "center",
     marginHorizontal: width * 0.04,
+    // marginBottom: height * 0.03,
     // marginBottom: height * 0.03,
   },
   disabledButton: {
@@ -217,7 +224,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    fontSize: height * 0.025,
+    fontSize: 18,
     fontWeight: "bold",
   },
   noSeatsContainer: {
