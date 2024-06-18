@@ -54,8 +54,8 @@ export default function ChooseLineScreen({ navigation }) {
     try {
       let response;
       const passengers = convertPassengers(searchQuery.passengers);
-
-      if (searchQuery.direction === 1 || !searchQuery.returnDate) {
+      if (!searchQuery.returnDate) {
+        console.log("jednosmjerna");
         response = await fetchPriceForRoute(
           searchQuery.direction,
           searchQuery.departure.id,
@@ -64,6 +64,8 @@ export default function ChooseLineScreen({ navigation }) {
           passengers
         );
       } else {
+        console.log("povratna");
+
         response = await fetchPriceForRoundTrip(
           searchQuery.direction,
           searchQuery.departure.id,
@@ -117,34 +119,8 @@ export default function ChooseLineScreen({ navigation }) {
     return unsubscribe;
   }, [navigation]);
 
-  const handleNext = () => {
-    if (!selectedLine) {
-      Alert.alert(
-        "Upozorenje",
-        "Molimo vas da izaberete liniju pre nego što nastavite."
-      );
-      return;
-    }
-    dispatch({
-      type: "SELECT_LINE",
-      payload: {
-        id_departure: selectedLine.id_departure,
-        total: selectedLine.totalPrice,
-      },
-    });
-    dispatch({
-      type: "UPDATE_PASSENGERS_INFO",
-      payload: selectedLine.passCatPriceSr,
-    });
-    if (isAuthenticated) {
-      navigation.navigate("PreOrderScreen");
-    } else {
-      navigation.navigate("EnterEmailScreen");
-    }
-  };
-
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: "#adadad" }}>
       <SafeAreaView style={{ flex: 1, justifyContent: "space-between" }}>
         <View>
           <CustomScreenHeader
@@ -157,7 +133,11 @@ export default function ChooseLineScreen({ navigation }) {
               {formatDate(searchQuery.departureDate)}
             </Text>
           </View>
-          <View style={{ padding: width * 0.04 }}>
+          <View
+            style={{
+              paddingVertical: width * 0.04,
+            }}
+          >
             {prices?.lineAndDeparture?.length > 0 ? (
               prices.lineAndDeparture.map((price, index) => (
                 <PricesWithInfoCard
@@ -167,6 +147,7 @@ export default function ChooseLineScreen({ navigation }) {
                   selectedLine={selectedLine}
                   setSelectedLine={setSelectedLine}
                   passCatPriceSr={prices.passCatPriceSr}
+                  navigation={navigation}
                 />
               ))
             ) : (
@@ -178,16 +159,6 @@ export default function ChooseLineScreen({ navigation }) {
             )}
           </View>
         </View>
-        <TouchableOpacity
-          style={[
-            styles.nextButton,
-            selectedLine === null && styles.disabledButton,
-          ]}
-          onPress={handleNext}
-          disabled={selectedLine === null}
-        >
-          <Text style={styles.buttonText}>DALJE</Text>
-        </TouchableOpacity>
       </SafeAreaView>
     </View>
   );
@@ -208,24 +179,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     paddingVertical: height * 0.01,
-  },
-  nextButton: {
-    backgroundColor: "#188DFD",
-    borderRadius: 5,
-    height: height * 0.07,
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: width * 0.04,
-    // marginBottom: height * 0.03,
-    // marginBottom: height * 0.03,
-  },
-  disabledButton: {
-    backgroundColor: "#B0C4DE",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
   },
   noSeatsContainer: {
     justifyContent: "center",

@@ -79,11 +79,13 @@ function searchReducer(state = initialState, action) {
       return {
         ...state,
         returnDate: action.payload,
+        direction: 2,
       };
     case "REMOVE_RETURN_DATE":
       return {
         ...state,
         returnDate: null,
+        direction: 1,
       };
     case "SET_EMAIL":
       console.log("SET_EMAIL", action.payload);

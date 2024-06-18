@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useDispatch } from "react-redux";
 import { formatPrice } from "../utils/formatPrice";
+import { Ionicons } from "@expo/vector-icons";
 import { useAssets } from "expo-asset";
 
 const { width, height } = Dimensions.get("window");
@@ -21,6 +22,28 @@ const PricesWithInfoCard = ({
   selectedLine,
   setSelectedLine,
 }) => {
+  const dispatch = useDispatch();
+
+  const handleSelect = () => {
+    setSelectedLine({
+      id_departure: data.id_departure,
+      totalPrice: totalPrice,
+      passCatPriceSr: passCatPriceSr,
+    });
+    dispatch({
+      type: "SELECT_LINE",
+      payload: {
+        id_departure: data.id_departure,
+        total: totalPrice,
+      },
+    });
+    dispatch({
+      type: "UPDATE_PASSENGERS_INFO",
+      payload: passCatPriceSr,
+    });
+    navigation.navigate("PreOrderScreen");
+  };
+
   function formatTimeToHoursAndMinutesOnly(time) {
     const [hours, minutes] = time.split(":");
     const hoursNum = parseInt(hours, 10);
@@ -55,14 +78,6 @@ const PricesWithInfoCard = ({
     require("../assets/icons/wifi.png"),
     require("../assets/icons/bus.png"),
   ]);
-
-  const handleSelect = () => {
-    setSelectedLine({
-      id_departure: data.id_departure,
-      totalPrice: totalPrice,
-      passCatPriceSr: passCatPriceSr,
-    });
-  };
 
   if (!assets)
     return (
@@ -125,6 +140,12 @@ const PricesWithInfoCard = ({
           <Text style={styles.price} numberOfLines={2}>
             {formatPrice(totalPrice)} RSD
           </Text>
+          <TouchableOpacity
+            style={styles.arrowRightContainer}
+            onPress={handleSelect}
+          >
+            <Ionicons name="arrow-forward" size={height * 0.03} color="white" />
+          </TouchableOpacity>
         </View>
       </View>
     </TouchableOpacity>
@@ -204,11 +225,18 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     justifyContent: "flex-end",
+    alignItems: "center",
   },
   price: {
     fontWeight: "bold",
     fontSize: height * 0.022,
-    color: "#005b85",
+    color: "black",
+    marginRight: 8,
+  },
+  arrowRightContainer: {
+    backgroundColor: "#005B85",
+    borderRadius: 20,
+    padding: 5,
   },
   travelingTime: {
     fontSize: height * 0.022,
