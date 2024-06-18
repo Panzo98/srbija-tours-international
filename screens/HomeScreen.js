@@ -336,7 +336,7 @@ const HomeScreen = ({ navigation }) => {
           }}
         >
           <TouchableOpacity style={styles.searchBtn} onPress={handleSearch}>
-            <Text style={styles.searchBtnText}>PRETRAŽITE</Text>
+            <Text style={styles.searchBtnText}>Pretražite</Text>
           </TouchableOpacity>
         </View>
       )}

@@ -109,7 +109,6 @@ const Ticket = ({ ticket, activeTab, loadStoredTickets, onToggleExpand }) => {
         style={[styles.container]}
         onPress={() => {
           onToggleExpand(ticket.id_res);
-          setSelected(!selected);
         }}
       >
         <View style={styles.qrContainer}>

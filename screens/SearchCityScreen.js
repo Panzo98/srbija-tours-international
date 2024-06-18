@@ -9,11 +9,10 @@ import {
   Animated,
   Dimensions,
 } from "react-native";
-import { Feather, AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather, AntDesign } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch } from "react-redux";
 import { useFocusEffect } from "@react-navigation/native";
-import { getCountry } from "../utils/getCountry";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -155,7 +154,7 @@ const CityItem = ({ item, onPress }) => {
 
   useEffect(() => {
     Animated.timing(heightAnim, {
-      toValue: screenHeight * 0.1,
+      toValue: screenHeight * 0.08,
       duration: 300,
       useNativeDriver: false,
     }).start();
@@ -164,12 +163,8 @@ const CityItem = ({ item, onPress }) => {
   return (
     <Animated.View style={{ height: heightAnim, overflow: "hidden" }}>
       <TouchableOpacity onPress={onPress} style={styles.cityItem}>
-        <MaterialCommunityIcons name="city-variant" size={24} color={"#999"} />
         <View style={styles.cityTextContainer}>
           <Text style={styles.cityText}>{item.value || item.name}</Text>
-          <Text style={styles.countryText}>
-            {getCountry(item.value || item.name)}
-          </Text>
         </View>
       </TouchableOpacity>
     </Animated.View>
