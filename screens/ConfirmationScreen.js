@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -22,13 +22,20 @@ import Carousel from "react-native-reanimated-carousel";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
-const ConfirmationScreen = () => {
+const ConfirmationScreen = ({ route }) => {
   const searchQuery = useSelector((state) => state.searchReducer);
-  const { passengersFullInfo } = searchQuery;
+  const { passengersFullInfo } = route.params;
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [currentStep, setCurrentStep] = useState(0);
-  const [assets] = useAssets([require("../assets/icons/arrow-down.png")]);
+  const [tempSearchReducer, setTempSearchReducer] = useState({});
+
+  const arrowDown = require("../assets/icons/arrow-down.png");
+  const tempArrowDown =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACMAAAAnCAYAAACFSPFPAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAEcSURBVHgB7Zc/S0JhFIdPBWaE0dLQ1tLW1NYQ+B1aW9oKGorSRURdnJz8NAqC+A38BDr6b3FwctHfwd/g4MEr99WrcB54EC/v633w/oEj4mzmQuKTgU9wBueSMK9wDF8kJucSH/137+ClxCRETDA8xsJjLDzGwmMsPMbCYyw8xsJjLDzGwmMsTjJGB7V72X3ou+G+oDGPsAlzMB1xj85RH7ABn6NsiBrTY8wng7YNbCmuLcAW7EtgUvzxCSzBKx7PwgU/lTTXTWFVAkyaFnoPFHmiMr9n12IyDNDZuwJvZc9owB8cwRp8Z8wbrMvqkvxy3UE44wk1qMOYNhzCf0nglXENf+CAMRqW5/HE+IJd+C1HgD49DxL9/ePszBLa8CdPOS4utwAAAABJRU5ErkJggg==";
+  useEffect(() => {
+    setTempSearchReducer(searchQuery);
+  }, [searchQuery]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -57,17 +64,7 @@ const ConfirmationScreen = () => {
     }
   };
 
-  if (!assets) {
-    return (
-      <View>
-        <Text>Učitavanje</Text>
-      </View>
-    );
-  }
-
   const handleFinish = () => {
-    dispatch({ type: "RESET_REDUCER" });
-    dispatch({ type: "RESET_PASSENGERS_INFO" });
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
@@ -82,41 +79,45 @@ const ConfirmationScreen = () => {
         <Text style={styles.title}>Pregled porudžbine</Text>
         <View style={styles.infoContainer}>
           <Text style={styles.label}>
-            Ime: <Text style={styles.boldText}>{passenger.name}</Text>
+            Ime: <Text style={styles.boldText}>{passenger?.name}</Text>
           </Text>
           <Text style={styles.label}>
-            Prezime: <Text style={styles.boldText}>{passenger.lastName}</Text>
+            Prezime: <Text style={styles.boldText}>{passenger?.lastName}</Text>
           </Text>
           <Text style={styles.label}>
             Kategorija:{" "}
             <Text style={styles.boldText}>
-              {formatCategoryToDisplay(passenger.category)}
+              {formatCategoryToDisplay(passenger?.category)}
             </Text>
           </Text>
           <Text style={styles.label}>
             Cena:{" "}
             <Text style={styles.boldText}>
-              {formatPrice(passenger.price)} RSD
+              {formatPrice(passenger?.price_rsd)} RSD
             </Text>
           </Text>
           <Text style={styles.label}>
             Datum rođenja:{" "}
-            <Text style={styles.boldText}>{passenger.birthday}</Text>
+            <Text style={styles.boldText}>{passenger?.birthday}</Text>
           </Text>
         </View>
 
         <View style={styles.scheduleContainer}>
           <View>
             <Text style={styles.time}>Datum polaska</Text>
-            <Text style={styles.time}>{searchQuery.departureDate}</Text>
+            <Text style={styles.time}>{tempSearchReducer?.departureDate}</Text>
           </View>
-          <Image source={assets[0]} style={styles.arrow} />
+          <Image
+            source={arrowDown}
+            defaultSource={{ uri: tempArrowDown }}
+            style={styles.arrow}
+          />
           <View>
             <Text style={styles.station}>
-              AS {searchQuery?.departure?.value}
+              AS {tempSearchReducer?.departure?.value}
             </Text>
             <Text style={styles.station}>
-              AS {searchQuery?.destination?.value}
+              AS {tempSearchReducer?.destination?.value}
             </Text>
           </View>
         </View>
@@ -125,7 +126,7 @@ const ConfirmationScreen = () => {
 
         <View style={styles.qrCodeContainer}>
           <QRCode
-            value={passenger.qrCode}
+            value={passenger?.qrCode}
             size={screenWidth * 0.3}
             style={styles.qrCode}
           />
@@ -134,28 +135,28 @@ const ConfirmationScreen = () => {
     </View>
   );
 
-  console.log("passengersFullInfo:", passengersFullInfo);
-
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={styles.safeArea} edges={["left", "right", "top"]}>
         <CustomScreenHeader title={"Porudžbina"} navigation={navigation} />
         <View style={styles.carouselWrapper}>
-          {passengersFullInfo && passengersFullInfo.length > 0 ? (
-            <Carousel
-              loop={false}
-              width={screenWidth}
-              height={screenHeight * 0.75}
-              data={passengersFullInfo}
-              renderItem={renderItem}
-              mode="parallax"
-              modeConfig={{
-                parallaxScrollingScale: 0.9,
-                parallaxScrollingOpacity: 0.7,
-                parallaxAdjacentItemScale: 0.8,
-              }}
-              onSnapToItem={(index) => setCurrentStep(index)}
-            />
+          {passengersFullInfo && passengersFullInfo?.length > 0 ? (
+            <>
+              <Carousel
+                loop={false}
+                width={screenWidth}
+                height={screenHeight * 0.75}
+                data={passengersFullInfo}
+                renderItem={renderItem}
+                mode="parallax"
+                modeConfig={{
+                  parallaxScrollingScale: 0.9,
+                  parallaxScrollingOpacity: 0.7,
+                  parallaxAdjacentItemScale: 0.8,
+                }}
+                onSnapToItem={(index) => setCurrentStep(index)}
+              />
+            </>
           ) : (
             <Text>Nema dostupnih informacija o putnicima.</Text>
           )}
@@ -177,13 +178,14 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+    backgroundColor: "#188dfd",
     justifyContent: "space-between",
   },
   carouselWrapper: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: screenHeight * 0.02,
+    backgroundColor: "#f5f5f5",
   },
   cardContainer: {
     shadowColor: "#000",
@@ -250,7 +252,8 @@ const styles = StyleSheet.create({
     marginVertical: screenHeight * 0.01,
   },
   buttonContainer: {
-    padding: screenWidth * 0.04,
+    paddingHorizontal: screenWidth * 0.04,
+    backgroundColor: "#f5f5f5",
   },
   navButton: {
     backgroundColor: "#188dfd",
@@ -258,6 +261,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     height: screenHeight * 0.07,
+    marginBottom: screenHeight * 0.03,
   },
   navButtonText: {
     color: "white",

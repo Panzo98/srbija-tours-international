@@ -8,20 +8,31 @@ const initialState = {
   departureDate: null,
   returnDate: null,
   total: null,
-  passengers: [
-    { count: 0, categoryId: 2, label: "Bebe 0-2", shortLabel: "Bebe" },
-    { count: 0, categoryId: 3, label: "Deca 3-12", shortLabel: "Deca" },
-    { count: 0, categoryId: 4, label: "Mladi 13-26", shortLabel: "Mladi" },
-    { count: 0, categoryId: 1, label: "Odrasli 27-60", shortLabel: "Odrasli" },
-    { count: 0, categoryId: 5, label: "Stariji 60+", shortLabel: "Stariji" },
-  ],
-  passengersFullInfo: [],
   email: "",
   tickets: [],
+  passengersForBackend: [], // salju se u formatu [4,4,2,1,6]
+  originalPassengersFullInfo: [], // salju se orginalni passCatPriceSr
+  editedPassengersInfo: [], // editovani passCatPriceSr gdje dodajemo firstName, lastName, phone, birthday
 };
 
 function searchReducer(state = initialState, action) {
   switch (action.type) {
+    case "UPDATE_PASSENGERS_INFO":
+      console.log("OVO JE UPDATE ZA PASSENGERS INFO", action.payload);
+      return {
+        ...state,
+        originalPassengersFullInfo: action.payload,
+      };
+    case "RESET_PASSENGERS_INFO":
+      return {
+        ...state,
+        originalPassengersFullInfo: [],
+      };
+    case "UPDATE_PASSENGERS_FULL_INFO":
+      return {
+        ...state,
+        editedPassengersInfo: [...action.payload],
+      };
     case "SET_DEPARTURE":
       return {
         ...state,
@@ -85,8 +96,29 @@ function searchReducer(state = initialState, action) {
         ...state,
         returnDate: null,
       };
+    case "RESET_PASSENGERS_FOR_BACKEND":
+      return {
+        ...state,
+        passengersForBackend: [],
+      };
+    case "ADD_PASSENGER_FOR_BACKEND":
+      return {
+        ...state,
+        passengersForBackend: [...state.passengersForBackend, action.payload],
+      };
+    case "REMOVE_PASSENGER_FOR_BACKEND": {
+      const index = state.passengersForBackend.indexOf(action.payload);
+      if (index === -1) return state;
+
+      const updatedPassengers = [...state.passengersForBackend];
+      updatedPassengers.splice(index, 1);
+
+      return {
+        ...state,
+        passengersForBackend: updatedPassengers,
+      };
+    }
     case "SET_EMAIL":
-      console.log("SET_EMAIL", action.payload);
       return {
         ...state,
         email: action.payload,
@@ -96,26 +128,6 @@ function searchReducer(state = initialState, action) {
         ...state,
         email: null,
       };
-    case "PASSENGER_INCREMENT": {
-      const newPassengers = state.passengers.map((passenger) => {
-        if (passenger.categoryId === action.payload) {
-          return { ...passenger, count: passenger.count + 1 };
-        }
-        return passenger;
-      });
-
-      return { ...state, passengers: newPassengers };
-    }
-    case "PASSENGER_DECREMENT": {
-      const newPassengers = state.passengers.map((passenger) => {
-        if (passenger.categoryId === action.payload) {
-          return { ...passenger, count: Math.max(passenger.count - 1, 0) };
-        }
-        return passenger;
-      });
-
-      return { ...state, passengers: newPassengers };
-    }
     case "SELECT_LINE":
       return {
         ...state,
@@ -127,71 +139,6 @@ function searchReducer(state = initialState, action) {
         ...state,
         id_departure: null,
         total: null,
-      };
-    case "RESET_PASSENGERS_INFO":
-      return {
-        ...state,
-        passengersFullInfo: [],
-      };
-    case "UPDATE_PASSENGER_INFO": {
-      const updatedPassengersInfo = [...state.passengersFullInfo];
-      updatedPassengersInfo[action.payload.index] = action.payload.data;
-      return {
-        ...state,
-        passengersFullInfo: updatedPassengersInfo,
-      };
-    }
-    case "ASSIGN_RESERVATION_IDS_TO_PASSENGERS": {
-      const reservationIds = action.payload;
-      const updatedPassengers = state.passengersFullInfo.map(
-        (passenger, index) => {
-          const reservationId = reservationIds[index];
-          return {
-            ...passenger,
-            reservationId,
-            qrCode: `https://drivesoft-srbijatours.com/ticket/show?booking_number=${reservationId}`,
-          };
-        }
-      );
-      return {
-        ...state,
-        passengersFullInfo: updatedPassengers,
-      };
-    }
-    case "UPDATE_PASSENGER_QR_CODE": {
-      const updatedPassengersInfo = [...state.passengersFullInfo];
-      updatedPassengersInfo[action.payload.index].qrCode =
-        action.payload.qrCode;
-      return {
-        ...state,
-        passengersFullInfo: updatedPassengersInfo,
-      };
-    }
-    case "RESET_PASSENGERS_COUNT":
-      return {
-        ...state,
-        passengers: [
-          { count: 0, categoryId: 2, label: "Bebe 0-2", shortLabel: "Bebe" },
-          { count: 0, categoryId: 3, label: "Deca 3-12", shortLabel: "Deca" },
-          {
-            count: 0,
-            categoryId: 4,
-            label: "Mladi 13-26",
-            shortLabel: "Mladi",
-          },
-          {
-            count: 0,
-            categoryId: 1,
-            label: "Odrasli 27-60",
-            shortLabel: "Odrasli",
-          },
-          {
-            count: 0,
-            categoryId: 5,
-            label: "Stariji 60+",
-            shortLabel: "Stariji",
-          },
-        ],
       };
     case "ADD_RESERVATION_IDS":
       return {

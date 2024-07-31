@@ -10,9 +10,7 @@ import {
   Platform,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useDispatch, useSelector } from "react-redux";
 import { format } from "date-fns";
-import { formatPrice } from "../utils/formatPrice";
 
 const { width, height } = Dimensions.get("window");
 
@@ -50,47 +48,29 @@ const getMinMaxDateForCategory = (category) => {
   return { minDate, maxDate };
 };
 
-const PassengerForm = ({ index, passenger }) => {
-  const passengersFullInfo = useSelector(
-    (state) => state.searchReducer.passengersFullInfo
-  );
-
-  const initialUser = {
-    name: "",
-    lastName: "",
-    phone: "",
-    birthday: "",
-    category: passenger.category,
-    price: passenger.price_rsd,
-    qrCode: "",
-  };
-
-  const [user, setUser] = useState(initialUser);
+const PassengerForm = ({ index, passenger, onChange }) => {
+  const [user, setUser] = useState(passenger);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tempBirthday, setTempBirthday] = useState(new Date());
-  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!passengersFullInfo[index]) {
-      dispatch({
-        type: "UPDATE_PASSENGER_INFO",
-        payload: { index, data: initialUser },
-      });
-    }
-  }, []);
+    setUser(passenger);
+  }, [passenger]);
 
   const handleChange = (field, value) => {
     const updatedUser = { ...user, [field]: value };
     setUser(updatedUser);
-    dispatch({
-      type: "UPDATE_PASSENGER_INFO",
-      payload: { index, data: updatedUser },
-    });
+    onChange(field, value);
   };
 
   const onChangeDate = (event, selectedDate) => {
-    if (selectedDate) {
-      setTempBirthday(selectedDate);
+    if (Platform.OS === "ios") {
+      setTempBirthday(selectedDate || tempBirthday);
+    } else {
+      setShowDatePicker(false);
+      if (selectedDate) {
+        handleChange("birthday", format(selectedDate, "yyyy-MM-dd"));
+      }
     }
   };
 
@@ -116,41 +96,44 @@ const PassengerForm = ({ index, passenger }) => {
     }
   };
 
-  const { minDate, maxDate } = getMinMaxDateForCategory(passenger.category);
+  const { minDate, maxDate } = getMinMaxDateForCategory(passenger?.category);
 
   return (
     <View style={styles.container}>
       <Text style={styles.infoText}>Unesite podatke putnika za kategoriju</Text>
       <Text style={styles.categoryText}>
-        "{formatCategoryToDisplay(passenger.category)}"
+        "{formatCategoryToDisplay(passenger?.category)}"
       </Text>
       <TextInput
         style={styles.input}
         placeholder="Ime: Pera"
-        value={user.name}
-        onChangeText={(text) => handleChange("name", text)}
+        value={user?.firstName}
+        onChangeText={(text) => handleChange("firstName", text)}
+        blurOnSubmit={false}
       />
       <TextInput
         style={styles.input}
         placeholder="Prezime: Perić"
-        value={user.lastName}
+        value={user?.lastName}
         onChangeText={(text) => handleChange("lastName", text)}
+        blurOnSubmit={false}
       />
       <TextInput
         style={styles.input}
         placeholder="Broj telefona: +381 62 432 34 23"
-        value={user.phone}
+        value={user?.phone}
         onChangeText={(text) => handleChange("phone", text)}
+        blurOnSubmit={false}
       />
       <TouchableOpacity
         onPress={() => setShowDatePicker(true)}
         style={styles.dateInput}
       >
-        <Text style={user.birthday ? styles.dateText : styles.placeholderText}>
-          {user.birthday ? user.birthday : "Datum rođenja: 1990-05-21"}
+        <Text style={user?.birthday ? styles.dateText : styles.placeholderText}>
+          {user?.birthday ? user?.birthday : "Datum rođenja: 1990-05-21"}
         </Text>
       </TouchableOpacity>
-      {showDatePicker && (
+      {showDatePicker && Platform.OS === "ios" && (
         <Modal
           transparent={true}
           animationType="slide"
@@ -163,10 +146,11 @@ const PassengerForm = ({ index, passenger }) => {
                 value={tempBirthday}
                 style={{ backgroundColor: "white" }}
                 mode="date"
-                display={Platform.OS === "ios" ? "spinner" : "default"}
+                display="spinner"
                 onChange={onChangeDate}
                 minimumDate={minDate}
                 maximumDate={maxDate}
+                textColor="black" // Set text color to black
               />
               <TouchableOpacity
                 style={styles.confirmButton}
@@ -178,12 +162,21 @@ const PassengerForm = ({ index, passenger }) => {
           </View>
         </Modal>
       )}
+      {showDatePicker && Platform.OS !== "ios" && (
+        <DateTimePicker
+          value={tempBirthday}
+          style={{ backgroundColor: "white" }}
+          mode="date"
+          display="default"
+          onChange={onChangeDate}
+          minimumDate={minDate}
+          maximumDate={maxDate}
+        />
+      )}
       <Text style={styles.priceInfoText}>
         Karta za izabranu kategoriju iznosi
       </Text>
-      <Text style={styles.priceText}>
-        {formatPrice(passenger.price_rsd)} RSD
-      </Text>
+      <Text style={styles.priceText}>{passenger?.price_rsd} RSD</Text>
     </View>
   );
 };

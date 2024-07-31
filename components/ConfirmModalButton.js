@@ -5,17 +5,17 @@ export default function ConfirmModalButton({ handleConfirm }) {
   return (
     <TouchableOpacity
       onPress={handleConfirm}
-      style={
-        {
-          // backgroundColor: "#e1e1e1",
-          // height: 30,
-          // paddingHorizontal: 10,
-          // justifyContent: "center",
-          // alignItems: "center",
-        }
-      }
+      style={{
+        backgroundColor: "#188DFD",
+        // backgroundColor: "#e1e1e1",
+        borderRadius: 5,
+        height: 40,
+        paddingHorizontal: 20,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
     >
-      <Text style={{ fontSize: 20 }}>Potvrdi izbor</Text>
+      <Text style={{ fontSize: 20, color: "white" }}>Potvrdi izbor</Text>
     </TouchableOpacity>
   );
 }

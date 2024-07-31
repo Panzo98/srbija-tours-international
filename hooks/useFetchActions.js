@@ -9,7 +9,6 @@ export const useFetchActions = () => {
     dispatch({ type: "SET_LOADING" });
     try {
       const response = await axios.get("/all_cities");
-      console.log("fetchAllCities done");
       dispatch({ type: "DISABLE_LOADING" });
       return response.data;
     } catch (error) {
@@ -20,12 +19,18 @@ export const useFetchActions = () => {
   };
   const getReservations = async (page = 1) => {
     try {
+      console.log(`getReservations called with page: ${page}`);
       dispatch({ type: "SET_LOADING" });
       const token = await SecureStore.getItemAsync("token");
 
       if (!token) {
-        throw new Error("No token found");
+        console.error("No token found");
+        dispatch({ type: "REMOVE_TICKETS" });
+        dispatch({ type: "DISABLE_LOADING" });
+        return { error: "No token found. Please log in." };
       }
+
+      console.log(`Token found: ${token}`);
 
       const response = await axios.get(`/passenger/reservations?page=${page}`, {
         headers: {
@@ -136,17 +141,12 @@ export const useFetchActions = () => {
   ) => {
     try {
       dispatch({ type: "SET_LOADING" });
-      console.log("passengers:", passengers);
-      console.log("direction:", direction);
-      console.log("city1:", city1);
-      console.log("city2:", city2);
-      console.log("date:", date);
+
       const response = await axios.get(
         `/price/${direction}/${city1}/${city2}/${date}/[${passengers}]`
       );
       console.log("fetchPriceForRoute done");
       dispatch({ type: "DISABLE_LOADING" });
-      console.log("fetchPriceForRoute response:", response);
       return response.data;
     } catch (error) {
       dispatch({ type: "DISABLE_LOADING" });
