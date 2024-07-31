@@ -13,24 +13,27 @@ import ConfirmModalButton from "./ConfirmModalButton";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
-const CustomPassengersPicker = ({ slideDown, modalName }) => {
+const CustomPassengersPicker = ({ slideDown, modalName, data }) => {
   const dispatch = useDispatch();
 
-  const passengers = useSelector((state) => state.searchReducer.passengers);
-  const finalPassengersCount = passengers.reduce((total, passenger) => {
-    return total + passenger.count;
-  }, 0);
+  const passengersForBackend = useSelector(
+    (state) => state.searchReducer.passengersForBackend
+  );
+
+  const countPassengers = (categoryId) => {
+    return passengersForBackend.filter((id) => id === categoryId).length;
+  };
 
   const handleAddPassenger = (categoryId) => {
-    if (finalPassengersCount < 7) {
+    if (passengersForBackend.length < 4) {
       return dispatch({
-        type: "PASSENGER_INCREMENT",
+        type: "ADD_PASSENGER_FOR_BACKEND",
         payload: categoryId,
       });
     } else {
       return Alert.alert(
         "Upozorenje",
-        "Maksimalan broj putnika po rezervaciji je 7!"
+        "Maksimalan broj putnika po rezervaciji je 4!"
       );
     }
   };
@@ -39,7 +42,7 @@ const CustomPassengersPicker = ({ slideDown, modalName }) => {
     <View>
       <ModalHeader modalName={modalName} slideDown={slideDown} />
       <View style={styles.container}>
-        {passengers.map((item, index) => (
+        {data.map((item, index) => (
           <View key={index} style={styles.row}>
             <View style={{ flex: 1 }}>
               <Text style={styles.labelText}>{item.label}</Text>
@@ -48,7 +51,7 @@ const CustomPassengersPicker = ({ slideDown, modalName }) => {
               <TouchableOpacity
                 onPress={() =>
                   dispatch({
-                    type: "PASSENGER_DECREMENT",
+                    type: "REMOVE_PASSENGER_FOR_BACKEND",
                     payload: item.categoryId,
                   })
                 }
@@ -56,7 +59,9 @@ const CustomPassengersPicker = ({ slideDown, modalName }) => {
               >
                 <Text style={styles.buttonText}>-</Text>
               </TouchableOpacity>
-              <Text style={styles.countText}>{item.count}</Text>
+              <Text style={styles.countText}>
+                {countPassengers(item.categoryId)}
+              </Text>
               <TouchableOpacity
                 onPress={() => handleAddPassenger(item.categoryId)}
                 style={styles.button}
@@ -77,7 +82,6 @@ const CustomPassengersPicker = ({ slideDown, modalName }) => {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    // padding: screenWidth * 0.04,
   },
   row: {
     flexDirection: "row",

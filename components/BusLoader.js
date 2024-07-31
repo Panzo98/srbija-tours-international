@@ -43,11 +43,19 @@ const BusLoader = () => {
 
   return (
     <View style={styles.overlay}>
-      {/* <Text style={styles.loadingText}>Učitavanje</Text> */}
       <Animated.View
-        style={[styles.iconContainer, { transform: [{ scale: scaleValue }] }]}
+        style={[styles.loaderContainer, { transform: [{ scale: scaleValue }] }]}
       >
-        <Fontisto name="bus" size={screenHeight * 0.06} color="#188DFD" />
+        <Animated.View
+          style={[styles.iconContainer, { transform: [{ scale: scaleValue }] }]}
+        >
+          <Fontisto
+            name="bus"
+            size={screenHeight * 0.06}
+            color="#188DFD"
+            style={{ zIndex: 1000 }}
+          />
+        </Animated.View>
       </Animated.View>
     </View>
   );
@@ -76,6 +84,16 @@ const styles = StyleSheet.create({
     height: screenHeight * 0.06,
     justifyContent: "center",
     alignItems: "center",
+  },
+  loaderContainer: {
+    backgroundColor: "white",
+    padding: screenWidth * 0.09,
+    borderRadius: 9,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
 });
 

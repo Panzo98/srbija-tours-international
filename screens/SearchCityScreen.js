@@ -8,6 +8,9 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
+  Keyboard,
+  TouchableWithoutFeedback,
+  StatusBar,
 } from "react-native";
 import { Feather, AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -58,6 +61,7 @@ const SearchCityScreen = ({ route, navigation }) => {
   };
 
   const selectCity = (cityDetails) => {
+    Keyboard.dismiss();
     if (type === "departure") {
       dispatch({
         type: "SET_DEPARTURE",
@@ -66,7 +70,7 @@ const SearchCityScreen = ({ route, navigation }) => {
     } else if (type === "destination") {
       dispatch({
         type: "SET_DESTINATION",
-        payload: { id: cityDetails.id_city, value: cityDetails.name },
+        payload: { id: cityDetails.key, value: cityDetails.value },
       });
     }
     navigation.goBack();
@@ -86,67 +90,80 @@ const SearchCityScreen = ({ route, navigation }) => {
     }).start();
   }, [filteredCities]);
 
+  const handleCityPress = (cityDetails) => {
+    Keyboard.dismiss();
+    setTimeout(() => {
+      selectCity(cityDetails);
+    }, 50);
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={navigation.goBack}>
-          <AntDesign name="arrowleft" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{modalName}</Text>
-        <View style={styles.searchContainer}>
-          <Feather
-            name="search"
-            size={screenHeight * 0.025}
-            color="#999"
-            style={{ marginRight: 5 }}
-          />
-          <TextInput
-            ref={searchInputRef}
-            placeholder="Unesite naziv grada"
-            placeholderTextColor="#999"
-            value={searchText}
-            onChangeText={handleSearch}
-            style={styles.input}
-            autoFocus={true}
-          />
-          {searchText.length > 0 && (
-            <TouchableOpacity onPress={clearSearch} style={{ marginLeft: 5 }}>
-              <AntDesign
-                name="close"
-                size={screenHeight * 0.025}
-                color="#999"
-              />
-            </TouchableOpacity>
-          )}
+    <View style={styles.safeAreaWrapper}>
+      <StatusBar barStyle="light-content" backgroundColor="#188DFD" />
+      <SafeAreaView style={styles.safeArea} edges={["left", "right", "top"]}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={navigation.goBack}>
+            <AntDesign name="arrowleft" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{modalName}</Text>
+          <View style={styles.searchContainer}>
+            <Feather
+              name="search"
+              size={screenHeight * 0.025}
+              color="#999"
+              style={{ marginRight: 5 }}
+            />
+            <TextInput
+              ref={searchInputRef}
+              placeholder="Unesite naziv grada"
+              placeholderTextColor="#999"
+              value={searchText}
+              onChangeText={handleSearch}
+              style={styles.input}
+              autoFocus={true}
+            />
+            {searchText.length > 0 && (
+              <TouchableOpacity onPress={clearSearch} style={{ marginLeft: 5 }}>
+                <AntDesign
+                  name="close"
+                  size={screenHeight * 0.025}
+                  color="#999"
+                />
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
-      </View>
-      <View style={styles.container}>
-        {searchText.length > 0 && (
-          <Animated.View
-            style={[styles.resultsContainer, { height: animatedHeight }]}
-          >
-            <ScrollView
-              showsVerticalScrollIndicator={true}
-              persistentScrollbar={true}
-            >
-              {filteredCities.length > 0 ? (
-                filteredCities.map((item) => (
-                  <CityItem
-                    key={item.key || item.id_city}
-                    item={item}
-                    onPress={() => selectCity(item)}
-                  />
-                ))
-              ) : (
-                <View style={styles.noResults}>
-                  <Text style={styles.noResultsText}>Nema rezultata</Text>
-                </View>
-              )}
-            </ScrollView>
-          </Animated.View>
-        )}
-      </View>
-    </SafeAreaView>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <View style={styles.container}>
+            {searchText.length > 0 && (
+              <Animated.View
+                style={[styles.resultsContainer, { height: animatedHeight }]}
+              >
+                <ScrollView
+                  showsVerticalScrollIndicator={true}
+                  persistentScrollbar={true}
+                  keyboardShouldPersistTaps="always"
+                >
+                  {filteredCities.length > 0 ? (
+                    filteredCities.map((item) => (
+                      <CityItem
+                        key={item.key || item.id_city}
+                        item={item}
+                        onPress={() => handleCityPress(item)}
+                      />
+                    ))
+                  ) : (
+                    <View style={styles.noResults}>
+                      <Text style={styles.noResultsText}>Nema rezultata</Text>
+                    </View>
+                  )}
+                </ScrollView>
+              </Animated.View>
+            )}
+          </View>
+        </TouchableWithoutFeedback>
+      </SafeAreaView>
+    </View>
   );
 };
 
@@ -177,13 +194,17 @@ const CityItem = ({ item, onPress }) => {
 };
 
 const styles = StyleSheet.create({
+  safeAreaWrapper: {
+    flex: 1,
+    backgroundColor: "#188DFD",
+  },
   safeArea: {
     flex: 1,
     backgroundColor: "#188DFD",
   },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#F5F4F4",
   },
   header: {
     backgroundColor: "#188DFD",
@@ -211,11 +232,14 @@ const styles = StyleSheet.create({
   },
   resultsContainer: {
     maxHeight: screenHeight * 0.6,
-    backgroundColor: "#fff",
+    // backgroundColor: "#fff",
   },
   cityItem: {
     padding: screenHeight * 0.02,
+    backgroundColor: "white",
     borderBottomWidth: 1,
+    borderTopWidth: 1,
+    borderTopColor: "#ddd",
     borderBottomColor: "#ddd",
     flexDirection: "row",
     alignItems: "center",

@@ -38,22 +38,11 @@ export default function ChooseLineScreen({ navigation }) {
     return formatted;
   };
 
-  function convertPassengers(passengers) {
-    const passengerArray = [];
-    passengers.forEach((passenger) => {
-      for (let i = 0; i < passenger.count; i++) {
-        passengerArray.push(passenger.categoryId);
-      }
-    });
-    return passengerArray;
-  }
-
   const searchQuery = useSelector((state) => state.searchReducer);
 
   const fetchPrices = async () => {
     try {
       let response;
-      const passengers = convertPassengers(searchQuery.passengers);
 
       if (searchQuery.direction === 1 || !searchQuery.returnDate) {
         response = await fetchPriceForRoute(
@@ -61,7 +50,7 @@ export default function ChooseLineScreen({ navigation }) {
           searchQuery.departure.id,
           searchQuery.destination.id,
           searchQuery.departureDate,
-          passengers
+          searchQuery.passengersForBackend
         );
       } else {
         response = await fetchPriceForRoundTrip(
@@ -70,7 +59,7 @@ export default function ChooseLineScreen({ navigation }) {
           searchQuery.destination.id,
           searchQuery.departureDate,
           searchQuery.returnDate,
-          passengers
+          searchQuery.passengersForBackend
         );
       }
       setPrices(response);
@@ -104,7 +93,7 @@ export default function ChooseLineScreen({ navigation }) {
       searchQuery.departureDate,
       searchQuery.returnDate,
       searchQuery.direction,
-      searchQuery.passengers,
+      searchQuery.passengersForBackend,
     ])
   );
 
@@ -132,6 +121,7 @@ export default function ChooseLineScreen({ navigation }) {
         total: selectedLine.totalPrice,
       },
     });
+
     dispatch({
       type: "UPDATE_PASSENGERS_INFO",
       payload: selectedLine.passCatPriceSr,
@@ -144,51 +134,54 @@ export default function ChooseLineScreen({ navigation }) {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <SafeAreaView style={{ flex: 1, justifyContent: "space-between" }}>
-        <View>
-          <CustomScreenHeader
-            title={`${searchQuery.departure.value} - ${searchQuery.destination.value}`}
-            navigation={navigation}
-          />
-          <View style={styles.miniBanner}>
-            <AntDesign name="calendar" size={height * 0.03} color="white" />
-            <Text style={styles.miniBannerTxt}>
-              {formatDate(searchQuery.departureDate)}
-            </Text>
-          </View>
-          <View style={{ padding: width * 0.04 }}>
-            {prices?.lineAndDeparture?.length > 0 ? (
-              prices.lineAndDeparture.map((price, index) => (
-                <PricesWithInfoCard
-                  data={price}
-                  key={index}
-                  totalPrice={prices.total.total}
-                  selectedLine={selectedLine}
-                  setSelectedLine={setSelectedLine}
-                  passCatPriceSr={prices.passCatPriceSr}
-                />
-              ))
-            ) : (
-              <View style={styles.noSeatsContainer}>
-                {searchQuery?.loading ? null : (
-                  <Text style={styles.noSeatsText}>Nema slobodnih mesta.</Text>
-                )}
-              </View>
+    <View style={{ flex: 1, backgroundColor: "#f5f5f5" }}>
+      <SafeAreaView
+        style={{
+          backgroundColor: "dodgerblue",
+        }}
+        edges={["top", "left", "right"]}
+      >
+        <CustomScreenHeader
+          title={`${searchQuery.departure.value} - ${searchQuery.destination.value}`}
+          navigation={navigation}
+        />
+        <View style={styles.miniBanner}>
+          <AntDesign name="calendar" size={height * 0.03} color="white" />
+          <Text style={styles.miniBannerTxt}>
+            {formatDate(searchQuery.departureDate)}
+          </Text>
+        </View>
+      </SafeAreaView>
+      <View style={{ flex: 1, padding: width * 0.04 }}>
+        {prices?.lineAndDeparture?.length > 0 ? (
+          prices.lineAndDeparture.map((price, index) => (
+            <PricesWithInfoCard
+              data={price}
+              key={index}
+              totalPrice={prices.total.total}
+              selectedLine={selectedLine}
+              setSelectedLine={setSelectedLine}
+              passCatPriceSr={prices.passCatPriceSr}
+            />
+          ))
+        ) : (
+          <View style={styles.noSeatsContainer}>
+            {searchQuery?.loading ? null : (
+              <Text style={styles.noSeatsText}>Nema slobodnih mesta.</Text>
             )}
           </View>
-        </View>
-        <TouchableOpacity
-          style={[
-            styles.nextButton,
-            selectedLine === null && styles.disabledButton,
-          ]}
-          onPress={handleNext}
-          disabled={selectedLine === null}
-        >
-          <Text style={styles.buttonText}>DALJE</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
+        )}
+      </View>
+      <TouchableOpacity
+        style={[
+          styles.nextButton,
+          selectedLine === null && styles.disabledButton,
+        ]}
+        onPress={handleNext}
+        disabled={selectedLine === null}
+      >
+        <Text style={styles.buttonText}>DALJE</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -216,8 +209,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: width * 0.04,
-    // marginBottom: height * 0.03,
-    // marginBottom: height * 0.03,
+    marginBottom: height * 0.03,
   },
   disabledButton: {
     backgroundColor: "#B0C4DE",

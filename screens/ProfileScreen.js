@@ -81,7 +81,7 @@ const ProfileScreen = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["left", "right", "top"]}>
       <View style={{ flex: 1 }}>
         <View style={styles.contentContainer}>
           <Text style={styles.text}>
@@ -109,21 +109,28 @@ const ProfileScreen = ({ navigation }) => {
             <Text style={styles.versionText}>v. 1.0.0 (1)</Text>
           }
         />
-        <TouchableOpacity
-          style={[
-            styles.logoutButton,
-            {
-              marginHorizontal: width * 0.04,
-              borderRadius: 5,
-              height: height * 0.07,
-              alignItems: "center",
-              justifyContent: "center",
-            },
-          ]}
-          onPress={handleLogout}
+        <View
+          style={{
+            backgroundColor: "#F5F4F4",
+          }}
         >
-          <Text style={styles.logoutButtonText}>ODJAVI SE</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.logoutButton,
+              {
+                marginHorizontal: width * 0.04,
+                borderRadius: 5,
+                height: height * 0.07,
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: height * 0.03,
+              },
+            ]}
+            onPress={handleLogout}
+          >
+            <Text style={styles.logoutButtonText}>ODJAVI SE</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -132,15 +139,15 @@ const ProfileScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#188dfd",
   },
   contentContainer: {
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
     backgroundColor: "#188DFD",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    // borderBottomLeftRadius: 20,
+    // borderBottomRightRadius: 20,
   },
   text: {
     fontSize: 22,
@@ -170,6 +177,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
+    backgroundColor: "white",
   },
   itemText: {
     fontSize: 16,

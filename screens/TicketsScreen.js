@@ -8,13 +8,14 @@ import {
   TouchableOpacity,
   Animated,
   RefreshControl,
+  StatusBar,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import CustomScreenHeader from "../components/CustomScreenHeader";
 import { useFetchActions } from "../hooks/useFetchActions";
 import Ticket from "../components/Ticket";
-import SkeletonTicket from "../components/SkeletonTicket";
 import * as SecureStore from "expo-secure-store";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
@@ -24,7 +25,7 @@ const TicketsScreen = ({ navigation }) => {
   const ticketsFromRedux = useSelector((state) => state.searchReducer.tickets);
   const loading = useSelector((state) => state.searchReducer.loading);
   const isConnected = useSelector((state) => state.connectionReducer.connected);
-  const [userToken, setUserToken] = useState(null);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const { getReservations } = useFetchActions();
   const [page, setPage] = useState(1);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -35,18 +36,12 @@ const TicketsScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [expandedTicketId, setExpandedTicketId] = useState(null);
 
-  const fetchUserToken = async () => {
-    const token = await SecureStore.getItemAsync("token");
-    setUserToken(token);
-  };
-
   useEffect(() => {
-    fetchUserToken();
     loadStoredTickets();
   }, []);
 
   useEffect(() => {
-    if (isConnected && userToken) {
+    if (isAuthenticated && isConnected) {
       setActiveTab("all");
       setPage(1);
       dispatch({ type: "SET_LOADING" });
@@ -59,13 +54,37 @@ const TicketsScreen = ({ navigation }) => {
       dispatch({ type: "SET_LOADING" });
       loadStoredTickets().finally(() => dispatch({ type: "DISABLE_LOADING" }));
     }
-  }, [isConnected, userToken]);
+  }, [isAuthenticated, isConnected]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadTickets = async () => {
+        if (isConnected && isAuthenticated) {
+          setActiveTab("all");
+          setPage(1);
+          dispatch({ type: "SET_LOADING" });
+          await getReservations(1);
+          dispatch({ type: "DISABLE_LOADING" });
+          setInitialLoad(false);
+        } else {
+          setActiveTab("stored");
+          dispatch({ type: "SET_LOADING" });
+          await loadStoredTickets();
+          dispatch({ type: "DISABLE_LOADING" });
+        }
+      };
+
+      loadTickets();
+    }, [isConnected, isAuthenticated])
+  );
 
   const loadStoredTickets = async () => {
     try {
       const stored = await SecureStore.getItemAsync("tickets");
       if (stored !== null) {
         setStoredTickets(JSON.parse(stored));
+      } else {
+        setStoredTickets([]);
       }
     } catch (error) {
       console.log("Error loading stored tickets:", error);
@@ -91,7 +110,7 @@ const TicketsScreen = ({ navigation }) => {
     setIsRefreshing(true);
     setRefreshing(true);
     setPage(1);
-    if (activeTab === "all") {
+    if (activeTab === "all" && isAuthenticated) {
       await getReservations(1);
     } else {
       await loadStoredTickets();
@@ -120,7 +139,7 @@ const TicketsScreen = ({ navigation }) => {
       duration: 150,
       useNativeDriver: false,
     }).start(() => {
-      if (tab === "all") {
+      if (tab === "all" && isAuthenticated) {
         getReservations(1).finally(() => dispatch({ type: "DISABLE_LOADING" }));
       } else {
         loadStoredTickets().finally(() =>
@@ -158,62 +177,51 @@ const TicketsScreen = ({ navigation }) => {
     activeTab === "all" ? ticketsFromRedux?.data || [] : storedTickets || [];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <CustomScreenHeader title={"Pregled narudžbi"} />
-      <View style={styles.tabsContainer}>
-        {isConnected && userToken ? (
-          <>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === "all" && styles.activeTab]}
-              onPress={() => handleTabChange("all")}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === "all" && styles.activeTabText,
-                ]}
+    <React.Fragment>
+      <StatusBar barStyle="light-content" backgroundColor="#188DFD" />
+      <SafeAreaView style={styles.safeArea} edges={["right", "left", "top"]}>
+        <CustomScreenHeader title={"Pregled narudžbi"} />
+        <View style={styles.tabsContainer}>
+          {isConnected && isAuthenticated ? (
+            <>
+              <TouchableOpacity
+                style={[styles.tab, activeTab === "all" && styles.activeTab]}
+                onPress={() => handleTabChange("all")}
               >
-                Sve karte
-              </Text>
-            </TouchableOpacity>
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === "all" && styles.activeTabText,
+                  ]}
+                >
+                  Sve karte
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.tab, activeTab === "stored" && styles.activeTab]}
+                onPress={() => handleTabChange("stored")}
+              >
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === "stored" && styles.activeTabText,
+                  ]}
+                >
+                  Preuzete karte
+                </Text>
+              </TouchableOpacity>
+            </>
+          ) : (
             <TouchableOpacity
-              style={[styles.tab, activeTab === "stored" && styles.activeTab]}
+              style={[styles.tab, styles.activeTab]}
               onPress={() => handleTabChange("stored")}
             >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === "stored" && styles.activeTabText,
-                ]}
-              >
+              <Text style={[styles.tabText, styles.activeTabText]}>
                 Preuzete karte
               </Text>
             </TouchableOpacity>
-          </>
-        ) : (
-          <TouchableOpacity
-            style={[styles.tab, styles.activeTab]}
-            onPress={() => handleTabChange("stored")}
-          >
-            <Text style={[styles.tabText, styles.activeTabText]}>
-              Preuzete karte
-            </Text>
-          </TouchableOpacity>
-        )}
-      </View>
-      {loading && initialLoad ? (
-        <FlatList
-          data={[1, 2, 3, 4, 5]}
-          renderItem={() => (
-            <View style={styles.container}>
-              <View style={styles.ticketContainer}>
-                <SkeletonTicket />
-              </View>
-            </View>
           )}
-          keyExtractor={(item) => item.toString()}
-        />
-      ) : (
+        </View>
         <View style={styles.container}>
           <FlatList
             data={ticketsData}
@@ -224,13 +232,13 @@ const TicketsScreen = ({ navigation }) => {
                   key={index}
                   activeTab={activeTab}
                   loadStoredTickets={loadStoredTickets}
-                  isExpanded={expandedTicketId === item.id_res}
+                  isExpanded={expandedTicketId === item?.id_res}
                   onToggleExpand={(id) => setExpandedTicketId(id)}
                 />
               </View>
             )}
             keyExtractor={(item, index) =>
-              item.id_res ? item.id_res.toString() : index.toString()
+              item?.id_res ? item.id_res?.toString() : index.toString()
             }
             ListEmptyComponent={
               activeTab === "all"
@@ -251,19 +259,20 @@ const TicketsScreen = ({ navigation }) => {
             }
           />
         </View>
-      )}
-    </SafeAreaView>
+      </SafeAreaView>
+    </React.Fragment>
   );
 };
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#188DFD",
   },
   tabsContainer: {
     flexDirection: "row",
     paddingVertical: screenHeight * 0.01,
+    backgroundColor: "#f5f5f5",
   },
   tab: {
     paddingVertical: screenHeight * 0.012,
@@ -288,6 +297,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: screenWidth * 0.02,
     paddingTop: screenHeight * 0.01,
+    backgroundColor: "#f5f5f5",
   },
   ticketContainer: {
     padding: screenHeight * 0.015,

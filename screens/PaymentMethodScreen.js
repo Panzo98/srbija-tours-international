@@ -12,12 +12,11 @@ import { useSelector, useDispatch } from "react-redux";
 import CustomScreenHeader from "../components/CustomScreenHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import { formatPassengersForBackend } from "../utils/formatPassengersForBackend";
 import * as SecureStore from "expo-secure-store";
 
 const { width, height } = Dimensions.get("window");
 
-export default function PaymentMethodScreen({ navigation }) {
+export default function PaymentMethodScreen({ navigation, route }) {
   const {
     id_departure,
     departure,
@@ -26,19 +25,16 @@ export default function PaymentMethodScreen({ navigation }) {
     paymentMethod,
     direction,
     total,
-    passengersFullInfo,
     email,
   } = useSelector((state) => state.searchReducer);
+  const { passengersInfo } = route.params;
   const isAuthenticated = useSelector((state) => state.auth);
-  const passengerssss = useSelector((state) => state.passengersReducer);
   const [selected, setSelected] = useState(null);
   const dispatch = useDispatch();
 
   const handleSelect = async (selectedIndex) => {
-    console.log(await SecureStore.getItemAsync("tickets"));
     setSelected(selectedIndex);
   };
-
   const handleBuy = async () => {
     try {
       dispatch({ type: "SET_LOADING" });
@@ -53,17 +49,20 @@ export default function PaymentMethodScreen({ navigation }) {
         paymentMethod: selected,
         direction,
         total,
-        passengers: formatPassengersForBackend(passengersFullInfo),
-        email,
+        passengers: passengersInfo,
+        email: isAuthenticated.isAuthenticated
+          ? isAuthenticated.user.email
+          : email,
       };
-      console.log(reservationData);
       if (isAuthenticated.isAuthenticated) {
         await handleAuthenticatedUser(reservationData);
       } else {
         await handleUnauthenticatedUser(reservationData);
       }
 
-      navigation.navigate("ConfirmationScreen");
+      navigation.navigate("ConfirmationScreen", {
+        passengersFullInfo: passengersInfo,
+      });
     } catch (error) {
       dispatch({ type: "DISABLE_LOADING" });
       Alert.alert("Greška", "Desila se greška prilikom rezervacije karte!");
@@ -84,13 +83,9 @@ export default function PaymentMethodScreen({ navigation }) {
           },
         }
       );
-      const _reservation_ids = response.data.reservation_ids;
-      dispatch({
-        type: "ASSIGN_RESERVATION_IDS_TO_PASSENGERS",
-        payload: _reservation_ids,
-      });
       Alert.alert("Uspješno", "Uspješno ste rezervisali karte");
     } catch (error) {
+      console.error("Error during handleAuthenticatedUser:", error);
       throw error;
     }
   };
@@ -107,25 +102,24 @@ export default function PaymentMethodScreen({ navigation }) {
         }
       );
 
+      const reservationsData = response.data.reservations?.data || [];
+
       const storedTickets =
         JSON.parse(await SecureStore.getItemAsync("tickets")) || [];
       await SecureStore.setItemAsync(
         "tickets",
-        JSON.stringify([...storedTickets, response.data.tickets])
+        JSON.stringify([...storedTickets, ...reservationsData])
       );
 
-      dispatch({
-        type: "ASSIGN_RESERVATION_IDS_TO_PASSENGERS",
-        payload: response.data.reservation_ids,
-      });
       Alert.alert("Uspješno", "Uspješno ste rezervisali karte");
     } catch (error) {
+      console.error("Error during handleUnauthenticatedUser:", error);
       throw error;
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={["left", "right", "top"]}>
       <CustomScreenHeader title={"Način plaćanja"} navigation={navigation} />
       <View style={styles.content}>
         <TouchableOpacity
@@ -186,16 +180,18 @@ export default function PaymentMethodScreen({ navigation }) {
           </View>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity
-        style={[
-          styles.finishButton,
-          selected === null && styles.disabledButton,
-        ]}
-        onPress={handleBuy}
-        disabled={selected === null}
-      >
-        <Text style={styles.buttonText}>DALJE</Text>
-      </TouchableOpacity>
+      <View style={{ backgroundColor: "#F5f4f4" }}>
+        <TouchableOpacity
+          style={[
+            styles.finishButton,
+            selected === null && styles.disabledButton,
+          ]}
+          onPress={handleBuy}
+          disabled={selected === null}
+        >
+          <Text style={styles.buttonText}>DALJE</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -204,10 +200,12 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     justifyContent: "space-between",
+    backgroundColor: "#188dfd",
   },
   content: {
     padding: width * 0.04,
     flex: 1,
+    backgroundColor: "#F5F4F4",
   },
   cardContainer: {
     backgroundColor: "white",
@@ -246,11 +244,12 @@ const styles = StyleSheet.create({
   },
   finishButton: {
     backgroundColor: "#188DFD",
-    borderRadius: 5,
     justifyContent: "center",
     alignItems: "center",
-    height: height * 0.07,
     marginHorizontal: width * 0.04,
+    height: height * 0.07,
+    borderRadius: 5,
+    marginBottom: height * 0.03,
   },
   disabledButton: {
     backgroundColor: "#B0C4DE",

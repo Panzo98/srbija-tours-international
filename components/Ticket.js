@@ -8,10 +8,12 @@ import {
   Easing,
   Alert,
   Dimensions,
+  Linking,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { formatPrice } from "../utils/formatPrice";
 import * as SecureStore from "expo-secure-store";
+import FillPdf from "../utils/fillPdf";
 
 const { width } = Dimensions.get("window");
 
@@ -21,7 +23,7 @@ const Ticket = ({ ticket, activeTab, loadStoredTickets, onToggleExpand }) => {
   const [commentHeight, setCommentHeight] = useState(0);
 
   useEffect(() => {
-    const baseHeight = ticket.direction === 2 ? 240 : 200;
+    const baseHeight = ticket?.direction === 2 ? 240 : 200;
     const targetHeight = selected ? baseHeight + commentHeight : 0;
     Animated.timing(heightAnim, {
       toValue: targetHeight,
@@ -29,11 +31,11 @@ const Ticket = ({ ticket, activeTab, loadStoredTickets, onToggleExpand }) => {
       easing: Easing.ease,
       useNativeDriver: false,
     }).start();
-  }, [selected, ticket.direction, commentHeight]);
+  }, [selected, ticket?.direction, commentHeight]);
 
   useEffect(() => {
-    calculateCommentHeight(ticket.comment);
-  }, [ticket.comment]);
+    calculateCommentHeight(ticket?.comment);
+  }, [ticket?.comment]);
 
   const calculateCommentHeight = (comment) => {
     if (!comment) {
@@ -100,7 +102,11 @@ const Ticket = ({ ticket, activeTab, loadStoredTickets, onToggleExpand }) => {
   };
 
   const handleView = () => {
-    console.log("Viewing ticket", ticket);
+    const url = `https://drivesoft-srbijatours.com/ticket/show?booking_number=${ticket.id_res}`;
+    Linking.openURL(url);
+  };
+  const handleCreatePdf = async () => {
+    await FillPdf({ ticketData: ticket });
   };
 
   return (
@@ -108,47 +114,51 @@ const Ticket = ({ ticket, activeTab, loadStoredTickets, onToggleExpand }) => {
       <TouchableOpacity
         style={[styles.container]}
         onPress={() => {
-          onToggleExpand(ticket.id_res);
+          onToggleExpand(ticket?.id_res);
           setSelected(!selected);
+          console.log(ticket);
         }}
       >
         <View style={styles.qrContainer}>
           <QRCode
-            value={`https://drivesoft-srbijatours.com/ticket/show?booking_number=${ticket.id_res}`}
+            value={`https://drivesoft-srbijatours.com/ticket/show?booking_number=${ticket?.id_res}`}
             size={90}
           />
-          <Text style={styles.reservationNumber}>#{ticket.id_res}</Text>
+          <Text style={styles.reservationNumber}>#{ticket?.id_res}</Text>
         </View>
         <View style={styles.detailsContainer}>
           <Text style={styles.name}>
-            {ticket.name} {ticket.lastname}
+            {ticket?.name} {ticket?.lastname}
           </Text>
           <Text style={styles.date}>
-            Datum: {new Date(ticket.created_at).toLocaleDateString()}
+            Datum: {new Date(ticket?.created_at).toLocaleDateString()}
           </Text>
-          <Text style={styles.email}>{ticket.email}</Text>
-          <Text style={styles.telephone}>{ticket.telephone}</Text>
-          <Text style={styles.price}>{formatPrice(ticket.rsd_price)} RSD</Text>
+          <Text style={styles.email}>{ticket?.email}</Text>
+          <Text style={styles.telephone}>{ticket?.telephone}</Text>
+          <Text style={styles.price}>{formatPrice(ticket?.rsd_price)} RSD</Text>
           <Animated.View
             style={[styles.animatedContainer, { height: heightAnim }]}
           >
             <Text style={styles.additionalInfo}>
-              Tip karte: {getDirectionText(ticket.direction)}
+              Tip karte: {getDirectionText(ticket?.direction)}
             </Text>
             <Text style={styles.additionalInfo}>
-              Status: {getUsageCountText(ticket.usage_count)}
+              Status: {getUsageCountText(ticket?.usage_count)}
             </Text>
             <Text style={[styles.additionalInfo, styles.comment]}>
-              Komentar: {ticket.comment || "Bez komentara"}
+              Komentar: {ticket?.comment || "Bez komentara"}
             </Text>
             <Text style={styles.additionalInfo}>
-              Od: {capitalizeFirstLetter(ticket.from_city)}
+              Od: {capitalizeFirstLetter(ticket?.from_city)}
             </Text>
             <Text style={styles.additionalInfo}>
-              Do: {capitalizeFirstLetter(ticket.to_city)}
+              Do: {capitalizeFirstLetter(ticket?.to_city)}
             </Text>
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.button} onPress={handleView}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => handleView()}
+              >
                 <Text style={styles.buttonText}>Pregled karte</Text>
               </TouchableOpacity>
               {activeTab === "all" && (
@@ -164,7 +174,7 @@ const Ticket = ({ ticket, activeTab, loadStoredTickets, onToggleExpand }) => {
                   <Text style={styles.buttonText}>Izbriši iz preuzetih</Text>
                 </TouchableOpacity>
               )}
-              {ticket.direction === 2 && (
+              {ticket?.direction === 2 && (
                 <TouchableOpacity
                   style={[styles.button, styles.disabledButton]}
                   disabled={true}

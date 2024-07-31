@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Dimensions } from "react-native";
+import React, { useEffect } from "react";
+import { View, Dimensions, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -16,6 +16,7 @@ import RegisterScreen from "../screens/RegisterScreen";
 import SearchCityScreen from "../screens/SearchCityScreen";
 import EnterEmailScreen from "../screens/EnterEmailScreen";
 import { useSelector } from "react-redux";
+import * as SecureStore from "expo-secure-store";
 import {
   Ionicons,
   AntDesign,
@@ -51,7 +52,7 @@ const MainTabNavigator = () => {
             tabBarHideOnKeyboard: true,
             headerShown: false,
             tabBarStyle: {
-              backgroundColor: "dodgerblue",
+              backgroundColor: "white",
               height: 70,
               paddingBottom: 10,
               borderTopColor: "#adadad",
@@ -59,24 +60,24 @@ const MainTabNavigator = () => {
             tabBarLabelStyle: {
               display: "none",
             },
-            tabBarActiveTintColor: "white",
-            tabBarInactiveTintColor: "white",
+            tabBarActiveTintColor: "dodgerblue",
+            tabBarInactiveTintColor: "gray",
             tabBarIcon: ({ color, size, focused }) => {
               let iconName;
               let iconType;
               let iconSize = isLargeScreen ? 40 : 28;
 
               if (route.name === "Home") {
-                iconName = "home";
+                iconName = focused ? "home" : "home-outline";
                 iconType = Ionicons;
               } else if (route.name === "Tickets") {
-                iconName = "ticket";
+                iconName = focused ? "ticket" : "ticket-outline";
                 iconType = Ionicons;
               } else if (route.name === "Terms") {
-                iconName = "infocirlce";
+                iconName = focused ? "infocirlce" : "infocirlceo";
                 iconType = AntDesign;
               } else if (route.name === "ProfileStack") {
-                iconName = "account";
+                iconName = focused ? "account" : "account-outline";
                 iconType = MaterialCommunityIcons;
               }
 

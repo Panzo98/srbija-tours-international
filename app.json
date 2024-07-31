@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "srbija-tours",
-    "slug": "srbija-tours",
+    "name": "Srbija Tours",
+    "slug": "srbija-tours-international",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "resizeMode": "cover",
+      "backgroundColor": "#0052CC"
     },
     "assetBundlePatterns": ["assets/**/*"],
     "ios": {
@@ -18,11 +18,18 @@
       "bundleIdentifier": "com.panzo98.srbijatours"
     },
     "android": {
+      "permissions": [
+        "ACCESS_NETWORK_STATE",
+        "INTERNET",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
       "jsEngine": "hermes",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "versionCode": 2,
       "package": "com.panzo98.srbijatours"
     },
     "web": {
@@ -31,8 +38,9 @@
     "plugins": ["expo-secure-store", "expo-asset"],
     "extra": {
       "eas": {
-        "projectId": "6dab5666-0e39-47dc-9b2a-c8f72044afb3"
+        "projectId": "dc73feee-82c6-4e26-8ec0-9e0968e38e67"
       }
-    }
+    },
+    "owner": "petar2020"
   }
 }
