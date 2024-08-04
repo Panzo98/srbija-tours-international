@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "Srbija Tours",
+    "slug": "srbija-tours-international",
+    "version": "1.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#0052CC"
+    },
+    "assetBundlePatterns": ["assets/**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "jsEngine": "hermes",
+      "bundleIdentifier": "com.panzo98.srbijatours"
+    },
+
+    "android": {
+      "permissions": [
+        "ACCESS_NETWORK_STATE",
+        "INTERNET",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "jsEngine": "hermes",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "versionCode": 3,
+      "package": "com.panzo98.srbijatours"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-secure-store", "expo-asset"],
+    "extra": {
+      "eas": {
+        "projectId": "dc73feee-82c6-4e26-8ec0-9e0968e38e67"
+      }
+    },
+    "owner": "petar2020",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/dc73feee-82c6-4e26-8ec0-9e0968e38e67"
+    }
+  }
+}
