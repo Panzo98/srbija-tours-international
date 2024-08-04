@@ -10,32 +10,37 @@ import {
   Dimensions,
   Keyboard,
   TouchableWithoutFeedback,
-  StatusBar,
 } from "react-native";
 import { Feather, AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch } from "react-redux";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { getCountry } from "../utils/getCountry";
+import { StatusBar as ExpoStatusBar } from "expo-status-bar";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 const SearchCityScreen = ({ route, navigation }) => {
   const { data, modalName, type } = route.params;
+  const testroute = useRoute();
   const [searchText, setSearchText] = useState("");
   const [filteredCities, setFilteredCities] = useState([]);
   const dispatch = useDispatch();
   const animatedHeight = useRef(new Animated.Value(screenHeight * 0.3)).current;
   const searchInputRef = useRef(null);
 
+  const resetState = () => {
+    setSearchText("");
+    setFilteredCities([]);
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  };
+
   useFocusEffect(
     React.useCallback(() => {
-      setSearchText("");
-      setFilteredCities([]);
-      if (searchInputRef.current) {
-        searchInputRef.current.focus();
-      }
-    }, [])
+      resetState();
+    }, [modalName, type])
   );
 
   const handleSearch = (text) => {
@@ -52,11 +57,7 @@ const SearchCityScreen = ({ route, navigation }) => {
       duration: 300,
       useNativeDriver: false,
     }).start(() => {
-      setSearchText("");
-      setFilteredCities([]);
-      if (searchInputRef.current) {
-        searchInputRef.current.focus();
-      }
+      resetState();
     });
   };
 
@@ -99,8 +100,11 @@ const SearchCityScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.safeAreaWrapper}>
-      <StatusBar barStyle="light-content" backgroundColor="#188DFD" />
       <SafeAreaView style={styles.safeArea} edges={["left", "right", "top"]}>
+        <ExpoStatusBar
+          backgroundColor={testroute.name === "Home" ? "#93b6d1" : "#188dfd"}
+          style="light"
+        />
         <View style={styles.header}>
           <TouchableOpacity onPress={navigation.goBack}>
             <AntDesign name="arrowleft" size={24} color="#fff" />
@@ -232,7 +236,6 @@ const styles = StyleSheet.create({
   },
   resultsContainer: {
     maxHeight: screenHeight * 0.6,
-    // backgroundColor: "#fff",
   },
   cityItem: {
     padding: screenHeight * 0.02,

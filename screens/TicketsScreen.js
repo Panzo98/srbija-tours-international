@@ -178,7 +178,7 @@ const TicketsScreen = ({ navigation }) => {
 
   return (
     <React.Fragment>
-      <StatusBar barStyle="light-content" backgroundColor="#188DFD" />
+      {/* <StatusBar barStyle="light-content" backgroundColor="#188DFD" /> */}
       <SafeAreaView style={styles.safeArea} edges={["right", "left", "top"]}>
         <CustomScreenHeader title={"Pregled narudžbi"} />
         <View style={styles.tabsContainer}>

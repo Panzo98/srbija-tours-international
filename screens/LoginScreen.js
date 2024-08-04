@@ -16,7 +16,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StatusBar,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { StatusBar as ExpoStatusBar } from "expo-status-bar";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -74,11 +77,18 @@ const LoginScreen = ({ navigation }) => {
     });
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      // StatusBar.setBackgroundColor("#188DFD");
+    }, [])
+  );
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
+      <ExpoStatusBar backgroundColor="#188dfd" style="light" />
+
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="always"

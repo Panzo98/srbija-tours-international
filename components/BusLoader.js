@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Dimensions,
   Platform,
+  StatusBar,
 } from "react-native";
 import { Fontisto } from "@expo/vector-icons";
 
@@ -17,6 +18,7 @@ const BusLoader = () => {
 
   useEffect(() => {
     console.log("BusLoader mounted");
+    // StatusBar.setBackgroundColor("#93b6d1");
 
     const animate = () => {
       console.log("Starting animation");

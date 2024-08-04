@@ -63,6 +63,19 @@ export default function ChooseLineScreen({ navigation }) {
         );
       }
       setPrices(response);
+
+      // if (!Array.isArray(response)) {
+      //   // console.log(prices.lineAndDeparture[0].id_departure);
+      //   // console.log(prices.total.total);
+      //   // // console.log(prices.totalPrice);
+      //   // console.log(prices.passCatPriceSr);
+      //   setSelectedLine({
+      //     id_departure: prices.lineAndDeparture[0].id_departure,
+      //     totalPrice: prices.total.total,
+      //     passCatPriceSr: prices.passCatPriceSr,
+      //   });
+      // }
+
       dispatch({ type: "DISABLE_LOADING" });
     } catch (error) {
       console.log("fetchPriceForRoute() ERROR", error);
@@ -158,6 +171,7 @@ export default function ChooseLineScreen({ navigation }) {
             <PricesWithInfoCard
               data={price}
               key={index}
+              index={index}
               totalPrice={prices.total.total}
               selectedLine={selectedLine}
               setSelectedLine={setSelectedLine}

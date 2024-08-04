@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ const PricesWithInfoCard = ({
   passCatPriceSr,
   selectedLine,
   setSelectedLine,
+  index,
 }) => {
   const dispatch = useDispatch();
   function formatTimeToHoursAndMinutesOnly(time) {
@@ -56,6 +57,15 @@ const PricesWithInfoCard = ({
   //   require("../assets/icons/wifi.png"),
   //   require("../assets/icons/bus.png"),
   // ]);
+  useEffect(() => {
+    if (index === 0) {
+      setSelectedLine({
+        id_departure: data.id_departure,
+        totalPrice: totalPrice,
+        passCatPriceSr: passCatPriceSr,
+      });
+    }
+  }, []);
 
   const arrowDown = require("../assets/icons/arrow-down.png");
   const tempArrowDown =

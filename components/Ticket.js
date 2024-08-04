@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -8,12 +8,12 @@ import {
   Easing,
   Alert,
   Dimensions,
-  Linking,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { formatPrice } from "../utils/formatPrice";
 import * as SecureStore from "expo-secure-store";
-import FillPdf from "../utils/fillPdf";
+import generatePdf from "../utils/generatePdf";
+import { useDispatch } from "react-redux";
 
 const { width } = Dimensions.get("window");
 
@@ -21,6 +21,8 @@ const Ticket = ({ ticket, activeTab, loadStoredTickets, onToggleExpand }) => {
   const [heightAnim] = useState(new Animated.Value(0));
   const [selected, setSelected] = useState(false);
   const [commentHeight, setCommentHeight] = useState(0);
+  const qrCodeRef = useRef();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const baseHeight = ticket?.direction === 2 ? 240 : 200;
@@ -52,7 +54,7 @@ const Ticket = ({ ticket, activeTab, loadStoredTickets, onToggleExpand }) => {
   };
 
   const getDirectionText = (direction) => {
-    return direction === 1 ? "Jednosmjerna" : "Povratna";
+    return direction === 1 ? "Jednosmerna" : "Povratna";
   };
 
   const getUsageCountText = (usageCount) => {
@@ -101,12 +103,10 @@ const Ticket = ({ ticket, activeTab, loadStoredTickets, onToggleExpand }) => {
     }
   };
 
-  const handleView = () => {
-    const url = `https://drivesoft-srbijatours.com/ticket/show?booking_number=${ticket.id_res}`;
-    Linking.openURL(url);
-  };
   const handleCreatePdf = async () => {
-    await FillPdf({ ticketData: ticket });
+    dispatch({ type: "SET_LOADING" });
+    await generatePdf(ticket, qrCodeRef);
+    dispatch({ type: "DISABLE_LOADING" });
   };
 
   return (
@@ -116,14 +116,15 @@ const Ticket = ({ ticket, activeTab, loadStoredTickets, onToggleExpand }) => {
         onPress={() => {
           onToggleExpand(ticket?.id_res);
           setSelected(!selected);
-          console.log(ticket);
         }}
       >
-        <View style={styles.qrContainer}>
-          <QRCode
-            value={`https://drivesoft-srbijatours.com/ticket/show?booking_number=${ticket?.id_res}`}
-            size={90}
-          />
+        <View style={styles.qrContainer} collapsable={false}>
+          <View ref={qrCodeRef}>
+            <QRCode
+              value={`https://drivesoft-srbijatours.com/ticket/show?booking_number=${ticket?.id_res}`}
+              size={90}
+            />
+          </View>
           <Text style={styles.reservationNumber}>#{ticket?.id_res}</Text>
         </View>
         <View style={styles.detailsContainer}>
@@ -155,10 +156,7 @@ const Ticket = ({ ticket, activeTab, loadStoredTickets, onToggleExpand }) => {
               Do: {capitalizeFirstLetter(ticket?.to_city)}
             </Text>
             <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => handleView()}
-              >
+              <TouchableOpacity style={styles.button} onPress={handleCreatePdf}>
                 <Text style={styles.buttonText}>Pregled karte</Text>
               </TouchableOpacity>
               {activeTab === "all" && (

@@ -14,6 +14,7 @@ import {
   ScrollView,
   Modal,
   Keyboard,
+  StatusBar,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { useDispatch } from "react-redux";
@@ -22,6 +23,8 @@ import { useAssets } from "expo-asset";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar as ExpoStatusBar } from "expo-status-bar";
+import { useFocusEffect } from "@react-navigation/native";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -63,6 +66,11 @@ const RegisterScreen = ({ navigation }) => {
       keyboardDidShowListener.remove();
     };
   }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      // StatusBar.setBackgroundColor("#188DFD");
+    }, [])
+  );
 
   const saveData = async (key, value) => {
     const isAvailable = await SecureStore.isAvailableAsync();
@@ -151,12 +159,13 @@ const RegisterScreen = ({ navigation }) => {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
+        {/* <ExpoStatusBar backgroundColor="#188dfd" style="light" /> */}
         <ScrollView contentContainerStyle={styles.container}>
           <Image
             source={companyLogo}
             defaultSource={{ uri: tempCompanyLogo }}
             style={styles.image}
-          />{" "}
+          />
           <View style={styles.inputContainer}>
             <Feather name="user" size={24} color="white" style={styles.icon} />
             <TextInput

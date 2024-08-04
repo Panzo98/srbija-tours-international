@@ -122,6 +122,7 @@ const MainTabNavigator = () => {
             component={PaymentMethodScreen}
             options={{ tabBarButton: () => null }}
           />
+
           <Tab.Screen
             name="PreOrderScreen"
             component={PreOrderScreen}

@@ -8,11 +8,14 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
+  StatusBar,
 } from "react-native";
 import { Feather, AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import ModalHeader from "./ModalHeader";
 import { useDispatch } from "react-redux";
 import { getCountry } from "../utils/getCountry";
+import { StatusBar as ExpoStatusBar } from "expo-status-bar";
+import { useFocusEffect, useRoute } from "@react-navigation/native";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -21,17 +24,33 @@ const SearchCity = ({ data, slideDown, modalName, type }) => {
   const [filteredCities, setFilteredCities] = useState([]);
   const dispatch = useDispatch();
   const animatedHeight = useRef(new Animated.Value(screenHeight * 0.3)).current;
+  const route = useRoute();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setFilteredCities([]);
+      setSearchText("");
+      if (route.name === "Home") {
+        StatusBar.setBackgroundColor("#93b6d1");
+        StatusBar.setTranslucent(true);
+      } else {
+        StatusBar.setBackgroundColor("#188DFD");
+        StatusBar.setTranslucent(false);
+      }
+    }, [route.name])
+  );
+
+  useEffect(() => {
+    setFilteredCities([]);
+    setSearchText("");
+  }, [modalName, type]);
 
   const handleSearch = (text) => {
     setSearchText(text);
-    // if (text.length < 1) {
-    //   setFilteredCities([]);
-    // } else {
     const filteredData = data.filter((item) =>
       (item.value || item.name).toLowerCase().includes(text.toLowerCase())
     );
     setFilteredCities(filteredData);
-    // }
   };
 
   const clearSearch = () => {
@@ -57,6 +76,8 @@ const SearchCity = ({ data, slideDown, modalName, type }) => {
         payload: { id: cityDetails.id_city, value: cityDetails.name },
       });
     }
+    setSearchText("");
+    setFilteredCities([]);
     slideDown();
   };
 
@@ -76,6 +97,8 @@ const SearchCity = ({ data, slideDown, modalName, type }) => {
 
   return (
     <View style={styles.container}>
+      <ExpoStatusBar backgroundColor="#188dfd" style="light" />
+
       <ModalHeader modalName={modalName} slideDown={slideDown} />
       <View style={styles.searchContainer}>
         <Feather

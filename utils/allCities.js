@@ -55,10 +55,17 @@ const allCities = [
   { key: 60, value: "Würzburg", country: "Germany" },
 ];
 
-export const getCitiesByCountry = (cityId) => {
-  console.log("getCitiesByCountry() called");
+const toItalyCities = () => {
+  return allCities.filter((c) => c.country === "Italy");
+};
+
+const getCitiesByCountry = (cityId) => {
   const city = allCities.find((c) => c.key === cityId);
   if (!city) return [];
+
+  if (city.key === 17 || city.key === 14) {
+    return toItalyCities();
+  }
 
   if (city.country === "Serbia") {
     return allCities.filter(
@@ -66,11 +73,18 @@ export const getCitiesByCountry = (cityId) => {
     );
   }
 
-  if (city.country === "Germany" || city.country === "Italy") {
-    return allCities.filter((c) => c.country === "Serbia");
+  if (city.country === "Germany") {
+    return allCities.filter((c) => c.country === "Serbia" && c.key !== 17);
+  }
+
+  if (city.country === "Italy") {
+    return allCities.filter(
+      (c) => c.country === "Serbia" && c.key !== 19 && c.key !== 18
+    );
   }
 
   return [];
 };
 
 export default allCities;
+export { getCitiesByCountry };

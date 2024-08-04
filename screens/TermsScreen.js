@@ -1,21 +1,17 @@
 import React from "react";
-import {
-  View,
-  ScrollView,
-  Text,
-  StyleSheet,
-  Dimensions,
-  StatusBar,
-} from "react-native";
+import { View, ScrollView, Text, StyleSheet, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomScreenHeader from "../components/CustomScreenHeader";
+import { StatusBar as ExpoStatusBar } from "expo-status-bar";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 const TermsScreen = () => {
   return (
     <React.Fragment>
-      <StatusBar barStyle="light-content" backgroundColor="#188DFD" />
+      {/* <StatusBar barStyle="light-content" backgroundColor="#188DFD" /> */}
+      {/* <ExpoStatusBar backgroundColor="#188dfd" style="light" /> */}
+
       <SafeAreaView style={styles.safeArea} edges={["right", "left", "top"]}>
         <View style={styles.headerContainer}>
           <CustomScreenHeader title={"Opšti uslovi prevoza"} />

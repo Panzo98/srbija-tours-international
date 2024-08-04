@@ -8,18 +8,31 @@ import {
   Alert,
   Linking,
   Dimensions,
+  StatusBar,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import * as SecureStore from "expo-secure-store";
 import CustomScreenHeader from "../components/CustomScreenHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRoute, useFocusEffect } from "@react-navigation/native";
 
 const ProfileScreen = ({ navigation }) => {
   const { width, height } = Dimensions.get("window");
 
   const user = useSelector((state) => state.auth.user);
-
+  const route = useRoute();
   const dispatch = useDispatch();
+  useFocusEffect(
+    React.useCallback(() => {
+      if (route.name === "Home") {
+        StatusBar.setBackgroundColor("#93b6d1");
+        StatusBar.setTranslucent(true);
+      } else {
+        StatusBar.setBackgroundColor("#188DFD");
+        StatusBar.setTranslucent(false);
+      }
+    }, [route])
+  );
 
   const handleLogout = async () => {
     Alert.alert(
